@@ -1,0 +1,410 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ================= Enums =================
+
+enum TransactionStatus {
+  pending
+  paid
+  refunded
+  cancelled
+}
+
+enum AuctionStatus {
+  draft
+  active
+  ended
+  cancelled
+  reported
+}
+
+enum CartStatus {
+  pending
+  expired
+  completed
+  cancelled
+}
+
+enum WithdrawalStatus {
+  pending
+  approved
+  rejected
+  paid
+}
+
+enum BalanceStatus {
+  pending
+  available
+  withdrawn
+}
+
+enum ItemGender {
+  male
+  female
+  unknown
+}
+
+// ================= Models =================
+
+model User {
+  id                   Int               @id @default(autoincrement())
+  name                 String
+  email                String            @unique
+  phone                String            @unique
+  password             String
+  role                 String            @default("user")
+  bio                  String?           @db.VarChar(160)
+  avatar               String?
+  banner               String?
+  city                 String?
+  instagram            String?
+  youtube              String?
+  isVerified           Boolean           @default(false)
+  isPriority           Boolean           @default(false)
+  reputation           Int               @default(0) // poin prestise
+  isBanned             Boolean           @default(false)
+  // Relations
+  auctions             Auction[]         @relation("UserAuctions")
+  items                Item[]            @relation("UserItems")
+  bids                 Bid[]
+  chats                Chat[]
+  carts                Cart[]
+  buyerTransactions    Transaction[]     @relation("BuyerTransactions")
+  sellerTransactions   Transaction[]     @relation("SellerTransactions")
+  withdrawals          Withdrawal[]
+  processedWithdrawals Withdrawal[]      @relation("ProcessedWithdrawals")
+  sellerBalances       SellerBalance[]
+  followers            Follow[]          @relation("Following")
+  following            Follow[]          @relation("Follower")
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  wishlists            Wishlist[]
+  likes                Like[]
+  userAchievements     UserAchievement[]
+  deletedAt            DateTime?
+  notifications        Notification[]
+  activities           Activity[]
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerId  Int
+  followingId Int
+  follower    User     @relation("Follower", fields: [followerId], references: [id])
+  following   User     @relation("Following", fields: [followingId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+model Auction {
+  id          Int             @id @default(autoincrement())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  status      AuctionStatus   @default(draft)
+  userId      Int
+  user        User            @relation("UserAuctions", fields: [userId], references: [id])
+  items       ItemOnAuction[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  createdBy   Int?
+  updatedBy   Int?
+  deletedAt   DateTime?
+
+  @@index([userId])
+}
+
+model Item {
+  id             Int             @id @default(autoincrement())
+  name           String
+  description    String?
+  // Spesifikasi teknis
+  size           Float? // cm (atau ganti ke Int kalau selalu bulat)
+  weight         Float?
+  gender         ItemGender      @default(unknown)
+  category       String?
+  origin         String?
+  breeder        String?
+  age            Int?
+  condition      String?
+  certificateUrl String?
+  attributes     Json?
+  // Harga & status lelang
+  startingBid    Decimal         @default(0.00) @db.Decimal(15, 2)
+  bidIncrement   Decimal         @default(0.00) @db.Decimal(15, 2)
+  buyItNow       Decimal?        @db.Decimal(15, 2)
+  isSold         Boolean         @default(false)
+  // Relasi
+  ownerId        Int
+  owner          User            @relation("UserItems", fields: [ownerId], references: [id])
+  auctions       ItemOnAuction[]
+  media          Media[]
+  // Metadata
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  createdBy      Int?
+  updatedBy      Int?
+  views          Int             @default(0)
+  likes          Like[]
+  wishlists      Wishlist[]
+  deletedAt      DateTime?
+  itemTags       ItemTag[]
+
+  @@index([ownerId])
+  @@index([category])
+  @@index([isSold])
+}
+
+model Tag {
+  id    Int       @id @default(autoincrement())
+  name  String    @unique
+  items ItemTag[]
+}
+
+model ItemTag {
+  id     Int  @id @default(autoincrement())
+  itemId Int
+  tagId  Int
+  item   Item @relation(fields: [itemId], references: [id])
+  tag    Tag  @relation(fields: [tagId], references: [id])
+}
+
+model ItemOnAuction {
+  id        Int       @id @default(autoincrement())
+  itemId    Int
+  auctionId Int
+  item      Item      @relation(fields: [itemId], references: [id])
+  auction   Auction   @relation(fields: [auctionId], references: [id])
+  status    String?   @default("active")
+  bids      Bid[]
+  chats     Chat[]
+  cart      Cart?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([itemId, auctionId])
+  @@index([auctionId])
+}
+
+model Media {
+  id        Int      @id @default(autoincrement())
+  url       String
+  type      String   @default("image")
+  itemId    Int
+  item      Item     @relation(fields: [itemId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  itemId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, itemId])
+}
+
+model Wishlist {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  itemId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  item      Item     @relation(fields: [itemId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, itemId])
+}
+
+model Bid {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id])
+  itemOnAuctionId Int
+  itemOnAuction   ItemOnAuction @relation(fields: [itemOnAuctionId], references: [id])
+  amount          Decimal       @db.Decimal(15, 2)
+  isWin           Boolean       @default(false)
+  isSnipe         Boolean       @default(false)
+  isBuyNow        Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+
+  @@index([itemOnAuctionId])
+  @@index([userId])
+}
+
+model Chat {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  user            User          @relation(fields: [userId], references: [id])
+  itemOnAuctionId Int
+  itemOnAuction   ItemOnAuction @relation(fields: [itemOnAuctionId], references: [id])
+  message         String
+  parentId        Int?
+  parent          Chat?         @relation("ChatReplies", fields: [parentId], references: [id])
+  replies         Chat[]        @relation("ChatReplies")
+  isDeleted       Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  deletedAt       DateTime?
+
+  @@index([itemOnAuctionId, createdAt])
+}
+
+model Cart {
+  id              Int           @id @default(autoincrement())
+  buyerId         Int
+  buyer           User          @relation(fields: [buyerId], references: [id])
+  itemOnAuctionId Int           @unique
+  itemOnAuction   ItemOnAuction @relation(fields: [itemOnAuctionId], references: [id])
+  price           Decimal       @db.Decimal(15, 2)
+  isPaid          Boolean       @default(false)
+  isProcessed     Boolean       @default(false)
+  status          CartStatus    @default(pending)
+  transaction     Transaction?
+  addedAt         DateTime      @default(now())
+  expiresAt       DateTime
+  paidAt          DateTime?
+
+  @@index([buyerId])
+  @@index([status])
+}
+
+model Achievement {
+  id               Int               @id @default(autoincrement())
+  name             String
+  description      String
+  icon             String?
+  badgeColor       String? // warna unik per badge
+  condition        String? // deskripsi syarat (misal “Menangkan 10 lelang”)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  achievementId Int
+  user          User        @relation(fields: [userId], references: [id])
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  earnedAt      DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+model Transaction {
+  id              Int               @id @default(autoincrement())
+  cartId          Int               @unique
+  cart            Cart              @relation(fields: [cartId], references: [id])
+  buyerId         Int
+  buyer           User              @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  sellerId        Int
+  seller          User              @relation("SellerTransactions", fields: [sellerId], references: [id])
+  totalAmount     Decimal           @db.Decimal(15, 2)
+  itemPrice       Decimal           @db.Decimal(15, 2)
+  adminFee        Decimal           @default(0.00) @db.Decimal(15, 2)
+  paymentGateway  String?
+  feeBreakdown    Json?
+  refundAmount    Decimal?          @default(0.00) @db.Decimal(15, 2)
+  refundedAt      DateTime?
+  status          TransactionStatus @default(pending)
+  paidAt          DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  sellerBalance   SellerBalance?    @relation(fields: [sellerBalanceId], references: [id])
+  sellerBalanceId Int?
+
+  @@index([status])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model SellerBalance {
+  id           Int           @id @default(autoincrement())
+  sellerId     Int
+  seller       User          @relation(fields: [sellerId], references: [id])
+  totalSales   Decimal       @default(0.00) @db.Decimal(15, 2)
+  adminFee     Decimal       @default(0.00) @db.Decimal(15, 2)
+  netBalance   Decimal       @default(0.00) @db.Decimal(15, 2)
+  status       BalanceStatus @default(pending)
+  transactions Transaction[]
+  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime      @default(now())
+
+  @@index([status])
+}
+
+model TransactionLog {
+  id            Int      @id @default(autoincrement())
+  referenceType String
+  referenceId   Int?
+  amount        Decimal  @db.Decimal(15, 2)
+  direction     String
+  note          String?
+  createdAt     DateTime @default(now())
+}
+
+model Withdrawal {
+  id              Int              @id @default(autoincrement())
+  sellerId        Int
+  seller          User             @relation(fields: [sellerId], references: [id])
+  amount          Decimal          @db.Decimal(15, 2)
+  status          WithdrawalStatus @default(pending)
+  processedBy     Int?
+  admin           User?            @relation("ProcessedWithdrawals", fields: [processedBy], references: [id])
+  payoutReference String?
+  payoutReceipt   String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([status])
+}
+
+model RevenueSummary {
+  id               Int      @id @default(autoincrement())
+  date             DateTime @unique
+  periodType       String   @default("daily") // daily | weekly | monthly
+  totalRevenue     Decimal  @default(0.00) @db.Decimal(15, 2)
+  totalFee         Decimal  @default(0.00) @db.Decimal(15, 2)
+  totalTransaction Int      @default(0)
+  totalWithdrawal  Int      @default(0)
+  createdAt        DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  message   String
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
