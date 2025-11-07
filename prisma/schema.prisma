@@ -56,13 +56,18 @@ enum ItemGender {
   unknown
 }
 
+enum ItemCondition {
+  new
+  used
+}
+
 // ================= Models =================
 
 model User {
   id                   Int               @id @default(autoincrement())
   name                 String
   email                String            @unique
-  phone                String            @unique
+  phone                String?           @unique
   password             String
   role                 String            @default("user")
   bio                  String?           @db.VarChar(160)
