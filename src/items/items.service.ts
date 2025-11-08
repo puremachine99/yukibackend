@@ -1,26 +1,120 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { CreateMediaDto } from './dto/create-media.dto';
 
 @Injectable()
 export class ItemsService {
-  create(createItemDto: CreateItemDto) {
-    return 'This action adds a new item';
+  constructor(private prisma: PrismaService) {}
+  async create(ownerId: number, dto: CreateItemDto) {
+    const { media, ...itemData } = dto;
+
+    const item = await this.prisma.item.create({
+      data: {
+        ...itemData,
+        ownerId,
+        media: media
+          ? {
+              create: media.map((m) => ({
+                url: m.url,
+                type: m.type,
+              })),
+            }
+          : undefined,
+      },
+      include: { media: true },
+    });
+
+    return item;
   }
 
-  findAll() {
-    return `This action returns all items`;
+  async findAll(filters: {
+    ownerId?: number;
+    category?: string;
+    isSold?: boolean;
+    page?: number;
+    limit?: number;
+  }) {
+    const { ownerId, category, isSold, page = 1, limit = 10 } = filters;
+
+    return this.prisma.item.findMany({
+      where: {
+        deletedAt: null,
+        ...(ownerId && { ownerId }),
+        ...(category && { category }),
+        ...(typeof isSold === 'boolean' && { isSold }),
+      },
+      include: {
+        owner: { select: { id: true, name: true, avatar: true } },
+        media: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} item`;
+  async findOne(id: number) {
+    const item = await this.prisma.item.findUnique({
+      where: { id },
+      include: {
+        owner: { select: { id: true, name: true, avatar: true } },
+        media: true,
+      },
+    });
+    if (!item) throw new NotFoundException('Item not found');
+    return item;
   }
 
-  update(id: number, updateItemDto: UpdateItemDto) {
-    return `This action updates a #${id} item`;
+  async uploadMedia(itemId: number, userId: number, dto: CreateMediaDto) {
+    const item = await this.prisma.item.findUnique({ where: { id: itemId } });
+    if (!item) throw new NotFoundException('Item not found');
+    if (item.ownerId !== userId)
+      throw new ForbiddenException('You are not the owner of this item');
+
+    return this.prisma.media.create({
+      data: {
+        itemId,
+        url: dto.url,
+        type: dto.type,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} item`;
+  async getMedia(itemId: number) {
+    return this.prisma.media.findMany({
+      where: { itemId },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async update(id: number, userId: number, dto: UpdateItemDto) {
+    const item = await this.prisma.item.findUnique({ where: { id } });
+    if (!item) throw new NotFoundException('Item not found');
+    if (item.ownerId !== userId)
+      throw new ForbiddenException('You are not the owner');
+
+    const updateData = { ...dto }; // pastikan ini plain JS object
+    return this.prisma.item.update({
+      where: { id },
+      data: dto as any,
+    });
+  }
+
+  async remove(id: number, userId: number) {
+    const item = await this.prisma.item.findUnique({ where: { id } });
+    if (!item) throw new NotFoundException('Item not found');
+    if (item.ownerId !== userId)
+      throw new ForbiddenException('You are not the owner');
+
+    return this.prisma.item.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 }

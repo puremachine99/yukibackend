@@ -1,26 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Injectable, ForbiddenException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class WishlistService {
-  create(createWishlistDto: CreateWishlistDto) {
-    return 'This action adds a new wishlist';
+  constructor(private prisma: PrismaService) {}
+
+  async toggleWishlist(userId: number, itemId: number) {
+    const existing = await this.prisma.wishlist.findUnique({
+      where: { userId_itemId: { userId, itemId } },
+    });
+
+    if (existing) {
+      await this.prisma.wishlist.delete({ where: { id: existing.id } });
+      return { message: 'Removed from wishlist', itemId };
+    }
+
+    await this.prisma.wishlist.create({
+      data: { userId, itemId },
+    });
+    return { message: 'Added to wishlist', itemId };
   }
 
-  findAll() {
-    return `This action returns all wishlist`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} wishlist`;
-  }
-
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} wishlist`;
+  async getWishlist(userId: number) {
+    return this.prisma.wishlist.findMany({
+      where: { userId },
+      include: { item: { include: { media: true, owner: true } } },
+    });
   }
 }

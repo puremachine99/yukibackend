@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
-import { AuctionsModule } from './auctions/auctions.module';
+import { AuctionModule } from './auction/auction.module';
 import { AuthModule } from './auth/auth.module';
 import { ItemsModule } from './items/items.module';
 import { BidModule } from './bid/bid.module';
@@ -25,6 +25,8 @@ import { TagModule } from './tag/tag.module';
 import { ItemTagModule } from './item-tag/item-tag.module';
 import { TransactionLogModule } from './transaction-log/transaction-log.module';
 import { ActivityModule } from './activity/activity.module';
+import { UserAddressModule } from './user-address/user-address.module';
+
 
 @Module({
   imports: [
@@ -32,7 +34,6 @@ import { ActivityModule } from './activity/activity.module';
     PrismaModule,
     UsersModule,
     AuthModule,
-    AuctionsModule,
     ItemsModule,
     BidModule,
     ChatModule,
@@ -52,6 +53,8 @@ import { ActivityModule } from './activity/activity.module';
     ItemTagModule,
     TransactionLogModule,
     ActivityModule,
+    AuctionModule,
+    UserAddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

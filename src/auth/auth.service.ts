@@ -16,6 +16,11 @@ export class AuthService {
     password: string;
     phone: string;
   }) {
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (existing) throw new UnauthorizedException('Email already registered');
+
     const hashed = await bcrypt.hash(dto.password, 10);
 
     const user = await this.prisma.user.create({

@@ -101,6 +101,29 @@ model User {
   deletedAt            DateTime?
   notifications        Notification[]
   activities           Activity[]
+  userAddresses        UserAddress[]
+}
+
+model UserAddress {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  label       String? // "Rumah", "Kantor", "Gudang", dst
+  recipient   String // nama penerima paket
+  phone       String // nomor kontak penerima
+  addressLine String // alamat lengkap
+  city        String
+  province    String
+  postalCode  String?
+  country     String? @default("Indonesia")
+
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Follow {
@@ -131,6 +154,7 @@ model Auction {
   createdBy   Int?
   updatedBy   Int?
   deletedAt   DateTime?
+  extraTime   Int?            @default(0)
 
   @@index([userId])
 }
