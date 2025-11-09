@@ -1,34 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Req,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PayCartDto } from './dto/pay-cart.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartService.create(createCartDto);
-  }
-
   @Get()
-  findAll() {
-    return this.cartService.findAll();
+  getUserCart(@Req() req) {
+    return this.cartService.getUserCart(req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
+  @Post(':itemOnAuctionId')
+  addToCart(@Req() req, @Param('itemOnAuctionId') itemOnAuctionId: string) {
+    return this.cartService.addToCart(req.user.id, +itemOnAuctionId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  @Patch(':id/pay')
+  simulatePay(@Req() req, @Param('id') id: string, @Body() dto: PayCartDto) {
+    return this.cartService.simulatePayment(req.user.id, +id, dto);
   }
 }

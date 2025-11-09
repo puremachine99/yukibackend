@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -26,11 +27,14 @@ import { ItemTagModule } from './item-tag/item-tag.module';
 import { TransactionLogModule } from './transaction-log/transaction-log.module';
 import { ActivityModule } from './activity/activity.module';
 import { UserAddressModule } from './user-address/user-address.module';
-
+import { AdminModule } from './admin/admin.module';
+import { AdvertisementModule } from './advertisement/advertisement.module';
+import { AdPlanModule } from './ad-plan/ad-plan.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     UsersModule,
     AuthModule,
@@ -55,6 +59,9 @@ import { UserAddressModule } from './user-address/user-address.module';
     ActivityModule,
     AuctionModule,
     UserAddressModule,
+    AdminModule,
+    AdvertisementModule,
+    AdPlanModule,
   ],
   controllers: [AppController],
   providers: [AppService],

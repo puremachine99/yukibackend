@@ -1,34 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Req,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { TransactionService } from './transaction.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PayTransactionDto } from './dto/pay-transaction.dto';
 
+@UseGuards(JwtAuthGuard)
 @Controller('transaction')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
-  @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionService.create(createTransactionDto);
-  }
-
   @Get()
-  findAll() {
-    return this.transactionService.findAll();
+  findAll(@Req() req) {
+    return this.transactionService.findAllByUser(req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionService.findOne(+id);
+  @Post(':cartId/pay')
+  payTransaction(
+    @Req() req,
+    @Param('cartId') cartId: string,
+    @Body() dto: PayTransactionDto,
+  ) {
+    return this.transactionService.payTransaction(req.user.id, +cartId, dto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionService.update(+id, updateTransactionDto);
+  @Get('seller/summary')
+  getSellerSummary(@Req() req) {
+    return this.transactionService.getSellerRevenueSummary(req.user.id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionService.remove(+id);
+  @Get('summary/daily')
+  async getTodaySummary() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return this.transactionService.getSummaryByDate(today);
   }
 }

@@ -7,10 +7,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateMediaDto } from './dto/create-media.dto';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class ItemsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private activity: ActivityService,
+  ) {}
   async create(ownerId: number, dto: CreateItemDto) {
     const { media, ...itemData } = dto;
 
@@ -28,6 +32,11 @@ export class ItemsService {
           : undefined,
       },
       include: { media: true },
+    });
+
+    await this.activity.log(ownerId, 'CREATE_ITEM', {
+      itemId: item.id,
+      name: item.name,
     });
 
     return item;
@@ -99,11 +108,17 @@ export class ItemsService {
     if (item.ownerId !== userId)
       throw new ForbiddenException('You are not the owner');
 
-    const updateData = { ...dto }; // pastikan ini plain JS object
-    return this.prisma.item.update({
+    const updated = await this.prisma.item.update({
       where: { id },
       data: dto as any,
     });
+
+    await this.activity.log(userId, 'UPDATE_ITEM', {
+      itemId: id,
+      fields: Object.keys(dto),
+    });
+
+    return updated;
   }
 
   async remove(id: number, userId: number) {

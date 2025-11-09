@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { ItemsController } from './items.controller';
 import { PrismaModule } from '../prisma/prisma.module';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, ActivityModule],
   controllers: [ItemsController],
   providers: [ItemsService],
 })

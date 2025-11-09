@@ -17,6 +17,7 @@ import { CreateMediaDto } from './dto/create-media.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 
+@UseGuards(JwtAuthGuard)
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
@@ -45,13 +46,11 @@ export class ItemsController {
     return this.itemsService.findOne(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Req() req, @Body() createItemDto: CreateItemDto) {
     return this.itemsService.create(req.user.id, createItemDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post(':id/media')
   uploadMedia(
     @Req() req,
@@ -67,13 +66,11 @@ export class ItemsController {
     return this.itemsService.getMedia(+id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Req() req, @Param('id') id: string, @Body() dto: UpdateItemDto) {
     return this.itemsService.update(+id, req.user.id, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Req() req, @Param('id') id: string) {
     return this.itemsService.remove(+id, req.user.id);

@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { SellerBalanceService } from './seller-balance.service';
 import { CreateSellerBalanceDto } from './dto/create-seller-balance.dto';
 import { UpdateSellerBalanceDto } from './dto/update-seller-balance.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('seller-balance')
 export class SellerBalanceController {
   constructor(private readonly sellerBalanceService: SellerBalanceService) {}

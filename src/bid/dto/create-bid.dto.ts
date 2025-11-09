@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty } from 'class-validator';
+import { IsNumber, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 
 export class CreateBidDto {
   @IsNumber()
@@ -8,4 +8,8 @@ export class CreateBidDto {
   @IsNumber()
   @IsNotEmpty()
   amount: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isBuyNow?: boolean;
 }

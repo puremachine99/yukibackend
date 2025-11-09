@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Patch,
   Post,
   Param,
   Req,
@@ -21,6 +22,11 @@ export class NotificationController {
 
   @Post(':id/read')
   async markAsRead(@Param('id') id: string, @Req() req) {
+    return this.service.markAsRead(+id, req.user.id);
+  }
+
+  @Patch(':id/read')
+  async patchRead(@Param('id') id: string, @Req() req) {
     return this.service.markAsRead(+id, req.user.id);
   }
 

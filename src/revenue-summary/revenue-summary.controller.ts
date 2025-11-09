@@ -1,8 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { RevenueSummaryService } from './revenue-summary.service';
 import { CreateRevenueSummaryDto } from './dto/create-revenue-summary.dto';
 import { UpdateRevenueSummaryDto } from './dto/update-revenue-summary.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('revenue-summary')
 export class RevenueSummaryController {
   constructor(private readonly revenueSummaryService: RevenueSummaryService) {}
