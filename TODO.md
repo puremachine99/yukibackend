@@ -115,7 +115,7 @@
 - [ ] Auto-ban user if unpaid after expiry
 - [x] Payment simulation
 - [x] Log : Add_to_cart, Pay_cart
-- [] Log : cart_expired (ban)
+- [ ] Log : cart_expired (ban)
 - [x] Notif : "Item added to cart"
 - [x] Notif : "cart expired"
 - [x] Activity : CART_EXPIRED (without auto-ban)
