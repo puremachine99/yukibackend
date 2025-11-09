@@ -5,9 +5,16 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { WithdrawalModule } from '../withdrawal/withdrawal.module';
 import { TransactionModule } from '../transaction/transaction.module';
 import { UsersModule } from '../users/users.module'; // Pastikan nama module sesuai folder kamu
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [PrismaModule, WithdrawalModule, TransactionModule, UsersModule],
+  imports: [
+    PrismaModule,
+    WithdrawalModule,
+    TransactionModule,
+    UsersModule,
+    NotificationModule,
+  ],
   controllers: [AdminController],
   providers: [AdminService],
 })

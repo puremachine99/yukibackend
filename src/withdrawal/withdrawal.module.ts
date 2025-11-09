@@ -9,5 +9,6 @@ import { ActivityModule } from '../activity/activity.module';
   imports: [PrismaModule, NotificationModule, ActivityModule],
   controllers: [WithdrawalController],
   providers: [WithdrawalService],
+  exports: [WithdrawalService],
 })
 export class WithdrawalModule {}

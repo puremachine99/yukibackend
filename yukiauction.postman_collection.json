@@ -1,0 +1,57 @@
+{
+  "info": {
+    "name": "YukiAuction Backend API",
+    "_postman_id": "yukiauction-collection-2025",
+    "description": "Auto-generated Postman collection for Yukiauction NestJS backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        { "name": "Register", "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/register", "body": { "mode": "raw", "raw": "{\"email\":\"user@example.com\",\"password\":\"P@ssw0rd!\",\"name\":\"Test User\",\"phone\":\"08123\"}", "options": { "raw": { "language": "json" } } } } },
+        { "name": "Login", "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/login", "body": { "mode": "raw", "raw": "{\"email\":\"user@example.com\",\"password\":\"P@ssw0rd!\"}", "options": { "raw": { "language": "json" } } } } },
+        { "name": "Refresh Token", "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/refresh" } }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        { "name": "Get Profile", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/users/me" } },
+        { "name": "Update Profile", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/users/me", "body": { "mode": "raw", "raw": "{\"city\":\"Jakarta\",\"bio\":\"Hello there\"}" } } }
+      ]
+    },
+    {
+      "name": "Auction",
+      "item": [
+        { "name": "List All Auctions", "request": { "method": "GET", "url": "{{baseUrl}}/auction" } },
+        { "name": "Create Auction", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/auction", "body": { "mode": "raw", "raw": "{\"title\":\"Evening Koi Auction\",\"description\":\"Live auction\",\"startTime\":\"2025-11-09T09:00:00Z\",\"endTime\":\"2025-11-09T10:00:00Z\"}", "options": { "raw": { "language": "json" } } } } }
+      ]
+    },
+    {
+      "name": "Bid",
+      "item": [
+        { "name": "Place Bid", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/bid", "body": { "mode": "raw", "raw": "{\"itemOnAuctionId\":1,\"amount\":1500000}" } } },
+        { "name": "Buy Now", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/bid", "body": { "mode": "raw", "raw": "{\"itemOnAuctionId\":1,\"amount\":2500000,\"isBuyNow\":true}" } } }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        { "name": "View Cart", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/cart" } },
+        { "name": "Pay Cart", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/cart/1/pay", "body": { "mode": "raw", "raw": "{\"paymentMethod\":\"manual_transfer\"}" } } }
+      ]
+    },
+    {
+      "name": "Notification",
+      "item": [
+        { "name": "Get Notifications", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/notification" } },
+        { "name": "Mark All Read", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/notification/read-all" } }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ]
+}

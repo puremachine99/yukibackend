@@ -154,11 +154,11 @@
 
 ## 13. Module: Admin
 - [x] JWT + @Roles('admin') required
-- [ ] Features:
-  - [ ] Manage users (ban/unban, auctions, withdrawals)
-  - [ ] Manage auctions (approve/reject/report)
-  - [ ] Dashboard revenue summary, SellerBalance
-  - [ ] Handle withdrawals
+- [x] Features:
+  - [x] Manage users (ban/unban, auctions, withdrawals)
+  - [x] Manage auctions (approve/reject/report)
+  - [x] Dashboard revenue summary, SellerBalance
+  - [x] Handle withdrawals
  
 ## 14. Shared Utilities
 - [x] @Public() decorator added
