@@ -1,11 +1,14 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { PrismaModule } from '../prisma/prisma.module';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 
+@Global()
 @Module({
   imports: [
     PrismaModule,
@@ -16,7 +19,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],
+  exports: [AuthService, JwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}

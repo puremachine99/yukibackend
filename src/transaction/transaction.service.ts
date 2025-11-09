@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
 import { ActivityService } from '../activity/activity.service';
 import { PayTransactionDto } from './dto/pay-transaction.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, CartStatus, TransactionStatus } from '@prisma/client';
 
 @Injectable()
 export class TransactionService {
@@ -56,14 +56,14 @@ export class TransactionService {
         totalAmount: cart.price,
         itemPrice: cart.price,
         paymentGateway: dto.paymentMethod || 'manual',
-        status: 'paid',
+        status: TransactionStatus.paid,
         paidAt: new Date(),
       },
     });
 
     await this.prisma.cart.update({
       where: { id: cart.id },
-      data: { isPaid: true, status: 'completed', paidAt: new Date() },
+      data: { isPaid: true, status: CartStatus.completed, paidAt: new Date() },
     });
 
     // ✅ Update SellerBalance (gross sales tracked as totalSales; platform fee handled separately)

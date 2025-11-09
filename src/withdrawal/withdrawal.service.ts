@@ -39,7 +39,7 @@ export class WithdrawalService {
       data: {
         sellerId: userId,
         amount: dto.amount,
-        status: 'pending',
+        status: WithdrawalStatus.pending,
       },
     });
 
@@ -79,7 +79,7 @@ export class WithdrawalService {
     const updated = await this.prisma.withdrawal.update({
       where: { id },
       data: {
-        status: dto.status as any,
+        status: dto.status,
         processedBy: adminId,
         payoutReference: dto.payoutReference,
         payoutReceipt: dto.payoutReceipt,
@@ -87,10 +87,20 @@ export class WithdrawalService {
       },
     });
 
-    // update summary
-    await this.prisma.revenueSummary.updateMany({
-      where: { date: { lte: new Date() } },
-      data: { totalWithdrawal: { increment: 1 } },
+    // update daily revenue summary (only today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    await this.prisma.revenueSummary.upsert({
+      where: { date: today },
+      update: { totalWithdrawal: { increment: 1 } },
+      create: {
+        date: today,
+        periodType: 'daily',
+        totalRevenue: new Prisma.Decimal(0),
+        totalFee: new Prisma.Decimal(0),
+        totalTransaction: 0,
+        totalWithdrawal: 1,
+      },
     });
 
     await this.notification.create(
@@ -110,10 +120,10 @@ export class WithdrawalService {
 
   async adminListAll(status?: string) {
     const validStatuses: WithdrawalStatus[] = [
-      'pending',
-      'approved',
-      'rejected',
-      'paid',
+      WithdrawalStatus.pending,
+      WithdrawalStatus.approved,
+      WithdrawalStatus.rejected,
+      WithdrawalStatus.paid,
     ];// samain kayak enum di scheme ya cok
 
     const where = validStatuses.includes(status as WithdrawalStatus)

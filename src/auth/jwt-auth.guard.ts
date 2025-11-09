@@ -1,15 +1,23 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from './decorators/public.decorator';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly prisma: PrismaService,
+  ) {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -17,6 +25,23 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
-    return super.canActivate(context);
+
+    const canActivate = (await super.canActivate(context)) as boolean;
+    if (!canActivate) return false;
+
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+    if (!user?.id) return false;
+
+    const record = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      select: { isBanned: true },
+    });
+
+    if (record?.isBanned) {
+      throw new ForbiddenException('Your account has been suspended.');
+    }
+
+    return true;
   }
 }

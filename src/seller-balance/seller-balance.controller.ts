@@ -1,45 +1,74 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
+  Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { SellerBalanceService } from './seller-balance.service';
-import { CreateSellerBalanceDto } from './dto/create-seller-balance.dto';
-import { UpdateSellerBalanceDto } from './dto/update-seller-balance.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { BalanceStatus } from '@prisma/client';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('seller-balance')
 export class SellerBalanceController {
   constructor(private readonly sellerBalanceService: SellerBalanceService) {}
 
-  @Post()
-  create(@Body() createSellerBalanceDto: CreateSellerBalanceDto) {
-    return this.sellerBalanceService.create(createSellerBalanceDto);
+  @Get('me')
+  getMyBalance(@Req() req) {
+    return this.sellerBalanceService.getSellerSummary(req.user.id);
   }
 
+  @Get('me/chart')
+  getMyChart(@Req() req, @Query('range') range?: string) {
+    return this.sellerBalanceService.getSellerChart(
+      req.user.id,
+      range ? Number(range) : undefined,
+    );
+  }
+
+  @Roles('admin')
   @Get()
-  findAll() {
-    return this.sellerBalanceService.findAll();
+  listBalances(
+    @Query('status') status?: BalanceStatus,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const validStatus =
+      status && Object.values(BalanceStatus).includes(status)
+        ? status
+        : undefined;
+    return this.sellerBalanceService.list({
+      status: validStatus,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sellerBalanceService.findOne(+id);
+  @Roles('admin')
+  @Get('overview')
+  getOverview() {
+    return this.sellerBalanceService.getOverview();
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSellerBalanceDto: UpdateSellerBalanceDto) {
-    return this.sellerBalanceService.update(+id, updateSellerBalanceDto);
+  @Roles('admin')
+  @Get(':sellerId')
+  getSellerBalance(@Param('sellerId') sellerId: string) {
+    return this.sellerBalanceService.getSellerDetail(+sellerId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sellerBalanceService.remove(+id);
+  @Roles('admin')
+  @Get(':sellerId/chart')
+  getSellerChart(
+    @Param('sellerId') sellerId: string,
+    @Query('range') range?: string,
+  ) {
+    return this.sellerBalanceService.getSellerChart(
+      +sellerId,
+      range ? Number(range) : undefined,
+    );
   }
 }

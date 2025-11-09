@@ -8,6 +8,7 @@ import { NotificationService } from '../notification/notification.service';
 import { ActivityService } from '../activity/activity.service';
 import { addDays } from 'date-fns';
 import { PayCartDto } from './dto/pay-cart.dto';
+import { CartStatus, TransactionStatus } from '@prisma/client';
 
 @Injectable()
 export class CartService {
@@ -19,7 +20,7 @@ export class CartService {
 
   async getUserCart(userId: number) {
     return this.prisma.cart.findMany({
-      where: { buyerId: userId, status: { not: 'expired' } },
+      where: { buyerId: userId, status: { not: CartStatus.expired } },
       include: {
         itemOnAuction: { include: { item: true, auction: true } },
       },
@@ -71,7 +72,7 @@ export class CartService {
       where: { id: cartId },
       data: {
         isPaid: true,
-        status: 'completed',
+        status: CartStatus.completed,
         paidAt: new Date(),
       },
     });
@@ -85,7 +86,7 @@ export class CartService {
         totalAmount: cart.price,
         itemPrice: cart.price,
         paymentGateway: dto.paymentMethod || 'manual',
-        status: 'paid',
+        status: TransactionStatus.paid,
         paidAt: new Date(),
       },
     });

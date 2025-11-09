@@ -24,8 +24,11 @@
     {
       "name": "Auction",
       "item": [
-        { "name": "List All Auctions", "request": { "method": "GET", "url": "{{baseUrl}}/auction" } },
-        { "name": "Create Auction", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/auction", "body": { "mode": "raw", "raw": "{\"title\":\"Evening Koi Auction\",\"description\":\"Live auction\",\"startTime\":\"2025-11-09T09:00:00Z\",\"endTime\":\"2025-11-09T10:00:00Z\"}", "options": { "raw": { "language": "json" } } } } }
+        { "name": "List All Auctions (public)", "request": { "method": "GET", "url": "{{baseUrl}}/auction" } },
+        { "name": "Live Auctions (public)", "request": { "method": "GET", "url": "{{baseUrl}}/auction/live" } },
+        { "name": "Auction Detail (public)", "request": { "method": "GET", "url": "{{baseUrl}}/auction/1" } },
+        { "name": "Create Auction", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/auction", "body": { "mode": "raw", "raw": "{\"title\":\"Evening Koi Auction\",\"description\":\"Live auction\",\"startTime\":\"2025-11-09T09:00:00Z\",\"endTime\":\"2025-11-09T10:00:00Z\"}", "options": { "raw": { "language": "json" } } } } },
+        { "name": "My Auctions", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/auction/me" } }
       ]
     },
     {
@@ -48,10 +51,65 @@
         { "name": "Get Notifications", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/notification" } },
         { "name": "Mark All Read", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/notification/read-all" } }
       ]
+    },
+    {
+      "name": "Withdrawal",
+      "item": [
+        { "name": "Request Withdrawal", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/withdrawal", "body": { "mode": "raw", "raw": "{\"amount\": 1000000}" } } },
+        { "name": "My Withdrawals", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/withdrawal" } },
+        { "name": "Admin: List Withdrawals", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/withdrawals?status=pending" } },
+        { "name": "Admin: Process Withdrawal", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/admin/withdrawals/1/process", "body": { "mode": "raw", "raw": "{\"status\":\"approved\",\"payoutReference\":\"TRX-001\"}" } } }
+      ]
+    },
+    {
+      "name": "Seller Balance",
+      "item": [
+        { "name": "Me: Summary", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/seller-balance/me" } },
+        { "name": "Me: Chart (7d)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/seller-balance/me/chart?range=7" } },
+        { "name": "Admin: List Balances", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/seller-balance?page=1&limit=20" } },
+        { "name": "Admin: Overview", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/seller-balance/overview" } },
+        { "name": "Admin: Seller Detail", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/seller-balance/1" } },
+        { "name": "Admin: Seller Chart", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/seller-balance/1/chart?range=14" } }
+      ]
+    },
+    {
+      "name": "Revenue Summary (Admin)",
+      "item": [
+        { "name": "List (paginated)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/revenue-summary?page=1&limit=30" } },
+        { "name": "Overview", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/revenue-summary/overview" } },
+        { "name": "Chart (14d)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/revenue-summary/chart?range=14" } },
+        { "name": "Detail", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/revenue-summary/1" } }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Dashboard", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/dashboard" } },
+        { "name": "Users", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/users" } },
+        { "name": "User Overview", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/users/1" } },
+        { "name": "Ban User", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/users/1/ban" } },
+        { "name": "Unban User", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/users/1/unban" } },
+        { "name": "Auctions (filter)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/auctions?status=ready" } },
+        { "name": "Approve Auction", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/auctions/1/approve" } },
+        { "name": "Reject Auction", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/auctions/1/reject" } },
+        { "name": "Report Auction", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/auctions/1/report" } },
+        { "name": "Revenue Summary (compact)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/revenue-summary" } }
+      ]
+    },
+    {
+      "name": "Advertisement",
+      "item": [
+        { "name": "Create Ad", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/advertisement", "body": { "mode": "raw", "raw": "{\"adPlanId\":1,\"title\":\"My Promo\",\"mediaUrl\":\"https://img\",\"redirectUrl\":\"https://link\",\"startDate\":\"2025-11-10\"}" } } },
+        { "name": "My Ads", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/advertisement/me" } },
+        { "name": "Admin: List Ads", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/advertisement/admin?status=pending" } },
+        { "name": "Admin: Update Status", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/advertisement/1/status", "body": { "mode": "raw", "raw": "{\"status\":\"approved\"}" } } },
+        { "name": "Serve Active Ads", "request": { "method": "GET", "url": "{{baseUrl}}/advertisement/serve?position=homepage_hero" } }
+      ]
     }
   ],
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:3000" },
-    { "key": "token", "value": "" }
+    { "key": "token", "value": "" },
+    { "key": "adminToken", "value": "" }
   ]
 }

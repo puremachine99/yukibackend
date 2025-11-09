@@ -159,13 +159,16 @@
   - [x] Manage auctions (approve/reject/report)
   - [x] Dashboard revenue summary, SellerBalance
   - [x] Handle withdrawals
- 
+  - [x] Log admin actions (approve/reject/report) via ActivityService
+
 ## 14. Shared Utilities
 - [x] @Public() decorator added
 - [x] JwtAuthGuard extended with Reflector
+- [x] JwtAuthGuard enforces banned-user lockouts (Prisma check)
 - [x] PrismaService universal provider
 - [x] Konsistensi @UseGuards(JwtAuthGuard) + @Public() di semua controller
 - [x] Optional: add @CurrentUser() decorator (shortcut for req.user!)
+- [x] Replace status string literals with Prisma enums (auction/cart/transaction/withdrawal)
 
 ## 15. Optional Enhancements (After Core Stable)
 - [x] Realtime updates via WebSocket (live auction)
@@ -191,6 +194,23 @@
 - [x] Billing: link advertisement to Transaction (transactionId) and AdPlan price
 - [x] Serving: expose approved/active ads per placement endpoint
 - [ ] Optional: impressions & click analytics
+
+## 18. Module: Seller Balance
+- [x] REST endpoints secured w/ JwtAuthGuard + RolesGuard
+- [x] List & filter balances (status, pagination) + top sellers overview
+- [x] Seller `GET /seller-balance/me` summary + pending withdrawal stats
+- [x] Admin detail endpoint w/ recent transactions & withdrawals
+- [x] Chart endpoint (seller + admin) for recent sales/admin fee trends
+
+## 19. Module: Revenue Summary
+- [x] Admin-only list w/ pagination & periodType filter
+- [x] Overview endpoint aggregating totals + last 7 days snapshot
+- [x] Chart endpoint for rolling revenue/fee/txn data (up to 90 days)
+- [x] Detail endpoint returns normalized Decimal values for analytics
+
+## 20. Module Cleanup
+- [x] Remove unused scaffolding modules (media, item-on-auction, tag, item-tag, transaction-log)
+- [x] Trim `AppModule` imports to only active modules
 
 # Testing
 - [x] E2E: Auth + User profile (register/login/refresh, GET/PATCH /user/me)

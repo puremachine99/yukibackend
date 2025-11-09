@@ -6,6 +6,7 @@ import { WithdrawalModule } from '../withdrawal/withdrawal.module';
 import { TransactionModule } from '../transaction/transaction.module';
 import { UsersModule } from '../users/users.module'; // Pastikan nama module sesuai folder kamu
 import { NotificationModule } from '../notification/notification.module';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { NotificationModule } from '../notification/notification.module';
     TransactionModule,
     UsersModule,
     NotificationModule,
+    ActivityModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

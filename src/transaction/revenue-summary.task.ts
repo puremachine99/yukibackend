@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, TransactionStatus } from '@prisma/client';
 
 @Injectable()
 export class RevenueSummaryTask {
@@ -20,7 +20,7 @@ export class RevenueSummaryTask {
 
     const transactions = await this.prisma.transaction.findMany({
       where: {
-        status: 'paid',
+        status: TransactionStatus.paid,
         paidAt: { gte: start, lte: end },
       },
     });

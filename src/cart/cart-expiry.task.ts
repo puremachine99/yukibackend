@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
 import { ActivityService } from '../activity/activity.service';
+import { CartStatus } from '@prisma/client';
 
 @Injectable()
 export class CartExpiryTask {
@@ -25,7 +26,7 @@ export class CartExpiryTask {
     const expiredCarts = await this.prisma.cart.findMany({
       where: {
         isPaid: false,
-        status: 'pending',
+        status: CartStatus.pending,
         expiresAt: { lt: new Date() },
       },
     });
@@ -38,7 +39,7 @@ export class CartExpiryTask {
     for (const cart of expiredCarts) {
       await this.prisma.cart.update({
         where: { id: cart.id },
-        data: { status: 'expired' },
+        data: { status: CartStatus.expired },
       });
 
       // optional auto-ban user (kalo mau, uncomment)

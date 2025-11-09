@@ -1,45 +1,46 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RevenueSummaryService } from './revenue-summary.service';
-import { CreateRevenueSummaryDto } from './dto/create-revenue-summary.dto';
-import { UpdateRevenueSummaryDto } from './dto/update-revenue-summary.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
 @Controller('revenue-summary')
 export class RevenueSummaryController {
   constructor(private readonly revenueSummaryService: RevenueSummaryService) {}
 
-  @Post()
-  create(@Body() createRevenueSummaryDto: CreateRevenueSummaryDto) {
-    return this.revenueSummaryService.create(createRevenueSummaryDto);
+  @Get()
+  list(
+    @Query('periodType') periodType?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.revenueSummaryService.list({
+      periodType,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
   }
 
-  @Get()
-  findAll() {
-    return this.revenueSummaryService.findAll();
+  @Get('overview')
+  overview() {
+    return this.revenueSummaryService.getOverview();
+  }
+
+  @Get('chart')
+  chart(@Query('range') range?: string) {
+    return this.revenueSummaryService.getChart(range ? Number(range) : undefined);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.revenueSummaryService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRevenueSummaryDto: UpdateRevenueSummaryDto) {
-    return this.revenueSummaryService.update(+id, updateRevenueSummaryDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.revenueSummaryService.remove(+id);
   }
 }

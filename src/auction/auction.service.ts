@@ -4,7 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client';
+import { User, AuctionStatus } from '@prisma/client';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 
@@ -22,7 +22,7 @@ export class AuctionService {
         description: dto.description,
         startTime: new Date(dto.startTime),
         endTime: new Date(dto.endTime),
-        status: 'draft',
+        status: AuctionStatus.draft,
       },
     });
   }
@@ -54,7 +54,7 @@ export class AuctionService {
 
     return this.prisma.auction.update({
       where: { id },
-      data: { deletedAt: new Date(), status: 'cancelled' },
+      data: { deletedAt: new Date(), status: AuctionStatus.cancelled },
     });
   }
 
@@ -79,7 +79,7 @@ export class AuctionService {
       where: {
         startTime: { lte: now },
         endTime: { gte: now },
-        status: 'active',
+        status: AuctionStatus.active,
         deletedAt: null,
       },
       include: {

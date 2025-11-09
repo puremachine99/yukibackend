@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
 import { addSeconds } from 'date-fns';
+import { AuctionStatus, CartStatus } from '@prisma/client';
 
 @Injectable()
 export class AuctionSchedulerTask {
@@ -17,13 +18,13 @@ export class AuctionSchedulerTask {
   async checkReadyAuctions() {
     const now = new Date();
     const readyAuctions = await this.prisma.auction.findMany({
-      where: { status: 'ready', startTime: { lte: now } },
+      where: { status: AuctionStatus.ready, startTime: { lte: now } },
     });
 
     for (const auction of readyAuctions) {
       await this.prisma.auction.update({
         where: { id: auction.id },
-        data: { status: 'active' },
+        data: { status: AuctionStatus.active },
       });
 
       await this.notification.create(
@@ -42,7 +43,7 @@ export class AuctionSchedulerTask {
     const now = new Date();
 
     const activeAuctions = await this.prisma.auction.findMany({
-      where: { status: 'active' },
+      where: { status: AuctionStatus.active },
     });
 
     for (const auction of activeAuctions) {
@@ -50,7 +51,7 @@ export class AuctionSchedulerTask {
       if (now >= endWithExtra) {
         await this.prisma.auction.update({
           where: { id: auction.id },
-          data: { status: 'ended' },
+          data: { status: AuctionStatus.ended },
         });
 
         this.logger.log(`Auction #${auction.id} → ENDED`);
@@ -107,7 +108,7 @@ export class AuctionSchedulerTask {
       const cartPayload = {
         buyerId: topBid.userId,
         price: topBid.amount,
-        status: 'pending' as const,
+        status: CartStatus.pending,
         isPaid: false,
         paidAt: null,
         expiresAt: addSeconds(new Date(), 3 * 24 * 60 * 60),

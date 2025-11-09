@@ -2,8 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WithdrawalService } from '../withdrawal/withdrawal.service';
 import { NotificationService } from '../notification/notification.service';
-import { AuctionStatus, Prisma } from '@prisma/client';
+import {
+  AuctionStatus,
+  Prisma,
+  WithdrawalStatus,
+  AdStatus,
+  TransactionStatus,
+} from '@prisma/client';
 import { ProcessWithdrawalDto } from '../withdrawal/dto/process-withdrawal.dto';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class AdminService {
@@ -11,6 +18,7 @@ export class AdminService {
     private readonly prisma: PrismaService,
     private readonly withdrawalService: WithdrawalService,
     private readonly notificationService: NotificationService,
+    private readonly activityService: ActivityService,
   ) {}
 
   async getDashboard() {
@@ -28,9 +36,11 @@ export class AdminService {
     ] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.user.count({ where: { isBanned: true } }),
-      this.prisma.auction.count({ where: { status: 'active' } }),
-      this.prisma.auction.count({ where: { status: 'ready' } }),
-      this.prisma.transaction.count({ where: { status: 'paid' } }),
+      this.prisma.auction.count({ where: { status: AuctionStatus.active } }),
+      this.prisma.auction.count({ where: { status: AuctionStatus.ready } }),
+      this.prisma.transaction.count({
+        where: { status: TransactionStatus.paid },
+      }),
       this.prisma.revenueSummary.findMany({
         orderBy: { date: 'desc' },
         take: 7,
@@ -40,9 +50,15 @@ export class AdminService {
         take: 5,
         include: { seller: { select: { id: true, name: true } } },
       }),
-      this.prisma.withdrawal.count({ where: { status: 'pending' } }),
-      this.prisma.advertisement.count({ where: { status: 'pending' } }),
-      this.prisma.advertisement.count({ where: { status: 'active' } }),
+      this.prisma.withdrawal.count({
+        where: { status: WithdrawalStatus.pending },
+      }),
+      this.prisma.advertisement.count({
+        where: { status: AdStatus.pending },
+      }),
+      this.prisma.advertisement.count({
+        where: { status: AdStatus.active },
+      }),
     ]);
 
     return {
@@ -203,15 +219,25 @@ export class AdminService {
   }
 
   async approveAuction(id: number, adminId: number) {
-    return this.updateAuctionStatus(id, adminId, 'ready', 'approved');
+    return this.updateAuctionStatus(id, adminId, AuctionStatus.ready, 'approved');
   }
 
   async rejectAuction(id: number, adminId: number) {
-    return this.updateAuctionStatus(id, adminId, 'cancelled', 'rejected');
+    return this.updateAuctionStatus(
+      id,
+      adminId,
+      AuctionStatus.cancelled,
+      'rejected',
+    );
   }
 
   async reportAuction(id: number, adminId: number) {
-    return this.updateAuctionStatus(id, adminId, 'reported', 'reported');
+    return this.updateAuctionStatus(
+      id,
+      adminId,
+      AuctionStatus.reported,
+      'reported',
+    );
   }
 
   private async updateAuctionStatus(
@@ -244,14 +270,20 @@ export class AdminService {
       { auctionId: auction.id, status },
     );
 
+    await this.activityService.log(adminId, `ADMIN_AUCTION_${notificationType.toUpperCase()}`, {
+      auctionId: auction.id,
+      targetUserId: auction.userId,
+      status,
+    });
+
     return updated;
   }
 
   async getPendingWithdrawals() {
-    return this.getWithdrawals('pending');
+    return this.getWithdrawals(WithdrawalStatus.pending);
   }
 
-  async getWithdrawals(status?: string) {
+  async getWithdrawals(status?: WithdrawalStatus | string) {
     return this.withdrawalService.adminListAll(status);
   }
 
