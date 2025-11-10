@@ -48,6 +48,7 @@ The server listens on `http://localhost:3000` by default.
 - Advertisement: plans, create ads, admin review, serving
 - Seller Balance: summary, chart (seller); list/overview/detail/chart (admin)
 - Revenue Summary: list/overview/chart/detail (admin)
+- Seller Review: buyers leave ratings/comments, viewable per seller, included in seller summaries
 
 Refer to `yukiauction.postman_collection.json` for a complete Postman collection, including admin routes. Use `{{token}}` for user JWT and `{{adminToken}}` for admin JWT.
 

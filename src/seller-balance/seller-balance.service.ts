@@ -93,9 +93,10 @@ export class SellerBalanceService {
       throw new NotFoundException('Seller balance not found');
     }
 
-    const [recentTransactions, recentWithdrawals, pendingWithdrawals] = await Promise.all([
-      this.prisma.transaction.findMany({
-        where: { sellerId },
+    const [recentTransactions, recentWithdrawals, pendingWithdrawals, rating] =
+      await Promise.all([
+        this.prisma.transaction.findMany({
+          where: { sellerId },
         orderBy: { createdAt: 'desc' },
         take: 5,
         select: {
@@ -117,12 +118,14 @@ export class SellerBalanceService {
           createdAt: true,
         },
       }),
-      this.pendingWithdrawalSummary(sellerId),
-    ]);
+        this.pendingWithdrawalSummary(sellerId),
+        this.sellerRatingSummary(sellerId),
+      ]);
 
     return {
       ...this.serializeBalance(balance),
       pendingWithdrawals,
+      rating,
       recentTransactions: recentTransactions.map((tx) => ({
         ...tx,
         totalAmount: this.decimalToNumber(tx.totalAmount),
@@ -143,11 +146,15 @@ export class SellerBalanceService {
       throw new NotFoundException('Seller balance not found');
     }
 
-    const pendingWithdrawals = await this.pendingWithdrawalSummary(sellerId);
+    const [pendingWithdrawals, rating] = await Promise.all([
+      this.pendingWithdrawalSummary(sellerId),
+      this.sellerRatingSummary(sellerId),
+    ]);
 
     return {
       ...this.serializeBalance(balance),
       pendingWithdrawals,
+      rating,
     };
   }
 
@@ -231,6 +238,19 @@ export class SellerBalanceService {
     return {
       count: aggregate._count._all,
       amount: this.decimalToNumber(aggregate._sum.amount),
+    };
+  }
+
+  private async sellerRatingSummary(sellerId: number) {
+    const aggregates = await this.prisma.sellerReview.aggregate({
+      where: { sellerId },
+      _avg: { rating: true, shippingScore: true },
+      _count: { _all: true },
+    });
+    return {
+      reviewCount: aggregates._count._all,
+      averageRating: aggregates._avg.rating ?? 0,
+      averageShipping: aggregates._avg.shippingScore ?? 0,
     };
   }
 }

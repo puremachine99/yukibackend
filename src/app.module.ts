@@ -25,6 +25,7 @@ import { UserAddressModule } from './user-address/user-address.module';
 import { AdminModule } from './admin/admin.module';
 import { AdvertisementModule } from './advertisement/advertisement.module';
 import { AdPlanModule } from './ad-plan/ad-plan.module';
+import { SellerReviewModule } from './seller-review/seller-review.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AdPlanModule } from './ad-plan/ad-plan.module';
     AdminModule,
     AdvertisementModule,
     AdPlanModule,
+    SellerReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

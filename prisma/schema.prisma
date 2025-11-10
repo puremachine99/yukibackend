@@ -111,6 +111,8 @@ model User {
   activities           Activity[]
   userAddresses        UserAddress[]
   advertisements       Advertisement[]
+  sellerReviewsGiven   SellerReview[]    @relation("SellerReviewsBuyer")
+  sellerReviewsReceived SellerReview[]   @relation("SellerReviewsSeller")
 }
 
 model UserAddress {
@@ -370,6 +372,7 @@ model Transaction {
   sellerBalance   SellerBalance?    @relation(fields: [sellerBalanceId], references: [id])
   sellerBalanceId Int?
   advertisements  Advertisement[]
+  sellerReview    SellerReview?
 
   @@index([status])
   @@index([buyerId])
@@ -458,6 +461,23 @@ model Advertisement {
   updatedAt     DateTime     @updatedAt
   transactionId Int?
   transaction   Transaction? @relation(fields: [transactionId], references: [id])
+}
+
+model SellerReview {
+  id          Int       @id @default(autoincrement())
+  transactionId Int     @unique
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  sellerId    Int
+  seller      User      @relation("SellerReviewsSeller", fields: [sellerId], references: [id])
+  buyerId     Int
+  buyer       User      @relation("SellerReviewsBuyer", fields: [buyerId], references: [id])
+  rating      Int
+  comment     String?
+  shippingScore Int?    @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([sellerId])
+  @@index([buyerId])
 }
 
 model Notification {

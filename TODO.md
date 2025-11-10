@@ -231,6 +231,14 @@
 - [x] Remove unused scaffolding modules (media, item-on-auction, tag, item-tag, transaction-log)
 - [x] Trim `AppModule` imports to only active modules
 
+## 21. Module: Seller Review
+
+- [x] Prisma model `SellerReview` linked to Transaction/User
+- [x] POST /seller-review (buyer only, transaction validation)
+- [x] GET /seller-review/pending for buyer tasks
+- [x] Public GET /seller-review/seller/:sellerId with aggregates
+- [x] Seller summary includes rating averages
+
 # Testing
 
 - [x] E2E: Auth + User profile (register/login/refresh, GET/PATCH /user/me)

@@ -105,6 +105,14 @@
         { "name": "Admin: Update Status", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/advertisement/1/status", "body": { "mode": "raw", "raw": "{\"status\":\"approved\"}" } } },
         { "name": "Serve Active Ads", "request": { "method": "GET", "url": "{{baseUrl}}/advertisement/serve?position=homepage_hero" } }
       ]
+    },
+    {
+      "name": "Seller Review",
+      "item": [
+        { "name": "Pending Reviews (buyer)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/seller-review/pending" } },
+        { "name": "Create Review", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/seller-review", "body": { "mode": "raw", "raw": "{\"transactionId\":1,\"rating\":5,\"shippingScore\":4,\"comment\":\"Fast delivery!\"}" } } },
+        { "name": "Public: Seller Reviews", "request": { "method": "GET", "url": "{{baseUrl}}/seller-review/seller/1?page=1&limit=10" } }
+      ]
     }
   ],
   "variable": [
