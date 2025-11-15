@@ -15,4 +15,7 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`🚀 Backend running on http://localhost:${port}`);
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Application failed to start', error);
+  process.exit(1);
+});

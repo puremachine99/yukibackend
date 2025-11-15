@@ -16,15 +16,15 @@ export class ItemsService {
     private activity: ActivityService,
   ) {}
   async create(ownerId: number, dto: CreateItemDto) {
-    const { media, ...itemData } = dto;
+    const { media: _media, ...itemData } = dto;
 
     const item = await this.prisma.item.create({
       data: {
         ...itemData,
         ownerId,
-        media: media
+        media: _media
           ? {
-              create: media.map((m) => ({
+              create: _media.map((m) => ({
                 url: m.url,
                 type: m.type,
               })),
@@ -108,9 +108,11 @@ export class ItemsService {
     if (item.ownerId !== userId)
       throw new ForbiddenException('You are not the owner');
 
+    const { media, ...itemData } = dto;
+
     const updated = await this.prisma.item.update({
       where: { id },
-      data: dto as any,
+      data: itemData,
     });
 
     await this.activity.log(userId, 'UPDATE_ITEM', {

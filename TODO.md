@@ -64,12 +64,12 @@
 - [x] Add @Public() routes for:
   - [x] GET /auction → list all public auctions
   - [x] GET /auction/live → current live auctions
-- [ ] Add findActiveAuctions() & findDetail() in auction.service.ts
+- [x] Add findActiveAuctions() & findDetail() in auction.service.ts
 - [x] Add private routes (POST, PATCH, DELETE) with req.user!.id
 - [x] Push notifikasi status lelang berubah (active / ended)
-- [ ] Activity log create auction (seller)
+- [x] Activity log create auction (seller)
 
-## 🟨 6. Module: User
+## 6. Module: User
 
 - [x] Generated via nest g resource user --no-spec
 - [x] Public route: GET /user/:id → public profile (for /profile/:id)
@@ -112,10 +112,10 @@
   - [x] POST /cart/:itemId → add item
   - [x] PATCH /cart/:id/pay → simulate payment
 - [x] Add expiration logic (3-day limit) — (tanggal diset, belum auto expire)
-- [ ] Auto-ban user if unpaid after expiry
+- [x] Auto-ban user if unpaid after expiry
 - [x] Payment simulation
 - [x] Log : Add_to_cart, Pay_cart
-- [ ] Log : cart_expired (ban)
+- [x] Log : cart_expired (ban)
 - [x] Notif : "Item added to cart"
 - [x] Notif : "cart expired"
 - [x] Activity : CART_EXPIRED (without auto-ban)

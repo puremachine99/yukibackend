@@ -19,4 +19,3 @@ export class CreateSellerReviewDto {
   @IsString()
   comment?: string;
 }
-

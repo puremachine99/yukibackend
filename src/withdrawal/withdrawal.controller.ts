@@ -6,7 +6,6 @@ import {
   Patch,
   Post,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { WithdrawalService } from './withdrawal.service';
@@ -15,6 +14,8 @@ import { CreateWithdrawalDto } from './dto/create-withdrawal.dto';
 import { ProcessWithdrawalDto } from './dto/process-withdrawal.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('withdrawal')
@@ -22,13 +23,16 @@ export class WithdrawalController {
   constructor(private readonly withdrawalService: WithdrawalService) {}
 
   @Post()
-  create(@Req() req, @Body() dto: CreateWithdrawalDto) {
-    return this.withdrawalService.requestWithdrawal(req.user.id, dto);
+  create(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Body() dto: CreateWithdrawalDto,
+  ) {
+    return this.withdrawalService.requestWithdrawal(user.id, dto);
   }
 
   @Get()
-  findAll(@Req() req) {
-    return this.withdrawalService.findAllByUser(req.user.id);
+  findAll(@CurrentUser() user: AuthenticatedRequestUser) {
+    return this.withdrawalService.findAllByUser(user.id);
   }
 
   // admin
@@ -41,10 +45,10 @@ export class WithdrawalController {
   @Roles('admin')
   @Patch(':id/process')
   process(
-    @Req() req,
+    @CurrentUser() user: AuthenticatedRequestUser,
     @Param('id') id: string,
     @Body() dto: ProcessWithdrawalDto,
   ) {
-    return this.withdrawalService.processWithdrawal(req.user.id, +id, dto);
+    return this.withdrawalService.processWithdrawal(user.id, +id, dto);
   }
 }

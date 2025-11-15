@@ -199,7 +199,7 @@ export class AdminService {
   async getAuctions(status?: string) {
     const valid = status && this.isValidAuctionStatus(status);
     return this.prisma.auction.findMany({
-      where: valid ? { status: status as AuctionStatus } : undefined,
+      where: valid ? { status: status } : undefined,
       include: {
         user: { select: { id: true, name: true, email: true } },
         items: {
@@ -219,7 +219,12 @@ export class AdminService {
   }
 
   async approveAuction(id: number, adminId: number) {
-    return this.updateAuctionStatus(id, adminId, AuctionStatus.ready, 'approved');
+    return this.updateAuctionStatus(
+      id,
+      adminId,
+      AuctionStatus.ready,
+      'approved',
+    );
   }
 
   async rejectAuction(id: number, adminId: number) {
@@ -270,11 +275,15 @@ export class AdminService {
       { auctionId: auction.id, status },
     );
 
-    await this.activityService.log(adminId, `ADMIN_AUCTION_${notificationType.toUpperCase()}`, {
-      auctionId: auction.id,
-      targetUserId: auction.userId,
-      status,
-    });
+    await this.activityService.log(
+      adminId,
+      `ADMIN_AUCTION_${notificationType.toUpperCase()}`,
+      {
+        auctionId: auction.id,
+        targetUserId: auction.userId,
+        status,
+      },
+    );
 
     return updated;
   }
@@ -283,7 +292,7 @@ export class AdminService {
     return this.getWithdrawals(WithdrawalStatus.pending);
   }
 
-  async getWithdrawals(status?: WithdrawalStatus | string) {
+  async getWithdrawals(status?: WithdrawalStatus) {
     return this.withdrawalService.adminListAll(status);
   }
 

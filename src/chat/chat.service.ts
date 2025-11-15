@@ -30,7 +30,9 @@ export class ChatService {
         include: { itemOnAuction: true },
       });
       if (!parent || parent.itemOnAuctionId !== dto.itemOnAuctionId) {
-        throw new ForbiddenException('Reply must reference the same auction thread');
+        throw new ForbiddenException(
+          'Reply must reference the same auction thread',
+        );
       }
     }
 

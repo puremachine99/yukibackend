@@ -42,25 +42,48 @@ export class CartExpiryTask {
         data: { status: CartStatus.expired },
       });
 
-      // optional auto-ban user (kalo mau, uncomment)
-      // await this.prisma.user.update({
-      //   where: { id: cart.buyerId },
-      //   data: { isBanned: true },
-      // });
+      const buyer = await this.prisma.user.findUnique({
+        where: { id: cart.buyerId },
+        select: { isBanned: true },
+      });
+
+      let autoBanApplied = false;
+      if (!buyer?.isBanned) {
+        await this.prisma.user.update({
+          where: { id: cart.buyerId },
+          data: { isBanned: true },
+        });
+        autoBanApplied = true;
+
+        await this.notification.create(
+          cart.buyerId,
+          'account_banned',
+          `Your account was suspended because cart #${cart.id} expired without payment.`,
+          { cartId: cart.id },
+        );
+
+        await this.activity.log(cart.buyerId, 'AUTO_BAN_CART', {
+          cartId: cart.id,
+          reason: 'Cart expired without payment',
+        });
+      }
 
       await this.notification.create(
         cart.buyerId,
         'cart_expired',
         `Your cart #${cart.id} has expired due to inactivity.`,
-        { cartId: cart.id },
+        { cartId: cart.id, autoBanApplied },
       );
 
       await this.activity.log(cart.buyerId, 'CART_EXPIRED', {
         cartId: cart.id,
         expiredAt: new Date(),
+        autoBanApplied,
       });
 
-      this.logger.warn(`Cart #${cart.id} expired and user notified.`);
+      this.logger.warn(
+        `Cart #${cart.id} expired${autoBanApplied ? ' and user auto-banned' : ''}.`,
+      );
     }
 
     this.logger.log(`Expired carts processed: ${expiredCarts.length}`);

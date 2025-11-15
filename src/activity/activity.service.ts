@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+
+type ActivityMetadata = Prisma.InputJsonValue | undefined;
 
 @Injectable()
 export class ActivityService {
   constructor(private prisma: PrismaService) {}
 
-  async log(userId: number | null, action: string, metadata?: any) {
+  async log(
+    userId: number | null,
+    action: string,
+    metadata?: ActivityMetadata,
+  ) {
     return this.prisma.activity.create({
       data: {
         userId,

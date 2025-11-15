@@ -87,9 +87,12 @@ export class AuthService {
 
   async refreshToken(dto: RefreshTokenDto) {
     try {
-      const payload = this.jwtService.verify(dto.refreshToken, {
-        secret: this.refreshSecret,
-      });
+      const payload = this.jwtService.verify<{ sub: number }>(
+        dto.refreshToken,
+        {
+          secret: this.refreshSecret,
+        },
+      );
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub },
       });

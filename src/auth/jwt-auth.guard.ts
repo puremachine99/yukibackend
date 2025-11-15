@@ -5,8 +5,10 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 import { IS_PUBLIC_KEY } from './decorators/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
+import type { AuthenticatedRequestUser } from './decorators/current-user.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -29,7 +31,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const canActivate = (await super.canActivate(context)) as boolean;
     if (!canActivate) return false;
 
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: AuthenticatedRequestUser }>();
     const user = request.user;
     if (!user?.id) return false;
 

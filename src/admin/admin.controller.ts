@@ -5,14 +5,16 @@ import {
   Param,
   Patch,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
+import { WithdrawalStatus } from '@prisma/client';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ProcessWithdrawalDto } from '../withdrawal/dto/process-withdrawal.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
@@ -51,23 +53,37 @@ export class AdminController {
   }
 
   @Patch('auctions/:id/approve')
-  async approveAuction(@Param('id') id: string, @Req() req) {
-    return this.adminService.approveAuction(+id, req.user.id);
+  async approveAuction(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedRequestUser,
+  ) {
+    return this.adminService.approveAuction(+id, user.id);
   }
 
   @Patch('auctions/:id/reject')
-  async rejectAuction(@Param('id') id: string, @Req() req) {
-    return this.adminService.rejectAuction(+id, req.user.id);
+  async rejectAuction(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedRequestUser,
+  ) {
+    return this.adminService.rejectAuction(+id, user.id);
   }
 
   @Patch('auctions/:id/report')
-  async reportAuction(@Param('id') id: string, @Req() req) {
-    return this.adminService.reportAuction(+id, req.user.id);
+  async reportAuction(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedRequestUser,
+  ) {
+    return this.adminService.reportAuction(+id, user.id);
   }
 
   @Get('withdrawals')
   async getWithdrawals(@Query('status') status?: string) {
-    return this.adminService.getWithdrawals(status);
+    const normalized =
+      status &&
+      Object.values(WithdrawalStatus).includes(status as WithdrawalStatus)
+        ? (status as WithdrawalStatus)
+        : undefined;
+    return this.adminService.getWithdrawals(normalized);
   }
 
   @Get('withdrawals/pending')
@@ -78,10 +94,10 @@ export class AdminController {
   @Patch('withdrawals/:id/process')
   async processWithdrawal(
     @Param('id') id: string,
-    @Req() req,
+    @CurrentUser() user: AuthenticatedRequestUser,
     @Body() dto: ProcessWithdrawalDto,
   ) {
-    return this.adminService.processWithdrawal(req.user.id, +id, dto);
+    return this.adminService.processWithdrawal(user.id, +id, dto);
   }
 
   @Get('revenue-summary')

@@ -1,11 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, RevenueSummary } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 interface ListParams {
   periodType?: string;
   page?: number;
   limit?: number;
+}
+
+export interface RevenueSummaryRecord {
+  id: number;
+  date: string;
+  periodType: string;
+  totalRevenue: number;
+  totalFee: number;
+  totalTransaction: number;
+  totalWithdrawal: number;
+  createdAt: Date;
 }
 
 @Injectable()
@@ -15,7 +26,9 @@ export class RevenueSummaryService {
   async list(params: ListParams) {
     const page = Math.max(1, params.page ?? 1);
     const limit = Math.min(100, Math.max(1, params.limit ?? 30));
-    const where = params.periodType ? { periodType: params.periodType } : undefined;
+    const where = params.periodType
+      ? { periodType: params.periodType }
+      : undefined;
 
     const [data, total] = await Promise.all([
       this.prisma.revenueSummary.findMany({
@@ -34,7 +47,9 @@ export class RevenueSummaryService {
   }
 
   async findOne(id: number) {
-    const summary = await this.prisma.revenueSummary.findUnique({ where: { id } });
+    const summary = await this.prisma.revenueSummary.findUnique({
+      where: { id },
+    });
     if (!summary) throw new NotFoundException('Revenue summary not found');
     return this.serialize(summary);
   }
@@ -79,7 +94,7 @@ export class RevenueSummaryService {
       orderBy: { date: 'asc' },
     });
 
-    type SummaryPoint = ReturnType<typeof this.serialize>;
+    type SummaryPoint = RevenueSummaryRecord;
     const buckets = new Map<string, SummaryPoint>();
     for (const entry of summaries) {
       const serialized = this.serialize(entry);
@@ -91,23 +106,25 @@ export class RevenueSummaryService {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
       const key = date.toISOString().split('T')[0];
-      const bucket = buckets.get(key) ?? {
-        id: 0,
-        date: key,
-        totalRevenue: 0,
-        totalFee: 0,
-        totalTransaction: 0,
-        totalWithdrawal: 0,
-        periodType: 'daily',
-        createdAt: date,
-      };
+      const bucket =
+        buckets.get(key) ??
+        ({
+          id: 0,
+          date: key,
+          totalRevenue: 0,
+          totalFee: 0,
+          totalTransaction: 0,
+          totalWithdrawal: 0,
+          periodType: 'daily',
+          createdAt: date,
+        } satisfies SummaryPoint);
       series.push(bucket);
     }
 
     return series;
   }
 
-  private serialize(entry: any) {
+  private serialize(entry: RevenueSummary): RevenueSummaryRecord {
     return {
       id: entry.id,
       date: entry.date.toISOString().split('T')[0],

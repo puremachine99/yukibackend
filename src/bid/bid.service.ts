@@ -5,7 +5,6 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
 import { NotificationService } from '../notification/notification.service';
@@ -151,9 +150,9 @@ export class BidService {
     return bid;
   }
 
-  async findAll(user: User) {
+  async findAll(userId: number) {
     return this.prisma.bid.findMany({
-      where: { userId: user.id },
+      where: { userId },
       include: {
         itemOnAuction: {
           include: { auction: true, item: true },
@@ -163,9 +162,9 @@ export class BidService {
     });
   }
 
-  async findOne(id: number, user: User) {
+  async findOne(id: number, userId: number) {
     const bid = await this.prisma.bid.findFirst({
-      where: { id, userId: user.id },
+      where: { id, userId },
       include: {
         itemOnAuction: { include: { auction: true, item: true } },
       },
@@ -174,16 +173,16 @@ export class BidService {
     return bid;
   }
 
-  async update(id: number, user: User, dto: UpdateBidDto) {
+  async update(id: number, userId: number, dto: UpdateBidDto) {
     return this.prisma.bid.updateMany({
-      where: { id, userId: user.id },
+      where: { id, userId },
       data: dto,
     });
   }
 
-  async remove(id: number, user: User) {
+  async remove(id: number, userId: number) {
     return this.prisma.bid.deleteMany({
-      where: { id, userId: user.id },
+      where: { id, userId },
     });
   }
 }

@@ -2,23 +2,77 @@
   "info": {
     "name": "YukiAuction Backend API",
     "_postman_id": "yukiauction-collection-2025",
-    "description": "Auto-generated Postman collection for Yukiauction NestJS backend",
+    "description": "Postman collection covering the latest NestJS backend endpoints (auth, auction, ads, finance, etc.)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
       "name": "Auth",
       "item": [
-        { "name": "Register", "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/register", "body": { "mode": "raw", "raw": "{\"email\":\"user@example.com\",\"password\":\"P@ssw0rd!\",\"name\":\"Test User\",\"phone\":\"08123\"}", "options": { "raw": { "language": "json" } } } } },
-        { "name": "Login", "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/login", "body": { "mode": "raw", "raw": "{\"email\":\"user@example.com\",\"password\":\"P@ssw0rd!\"}", "options": { "raw": { "language": "json" } } } } },
-        { "name": "Refresh Token", "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/auth/refresh" } }
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"user@example.com\",\"password\":\"P@ssw0rd!\",\"name\":\"Test User\",\"phone\":\"08123\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"user@example.com\",\"password\":\"P@ssw0rd!\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\":\"{{refreshToken}}\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        }
       ]
     },
     {
       "name": "Users",
       "item": [
-        { "name": "Get Profile", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/users/me" } },
-        { "name": "Update Profile", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/users/me", "body": { "mode": "raw", "raw": "{\"city\":\"Jakarta\",\"bio\":\"Hello there\"}" } } }
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/users/me"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/users/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"city\":\"Jakarta\",\"bio\":\"Hello there\"}"
+            }
+          }
+        }
       ]
     },
     {
@@ -27,22 +81,68 @@
         { "name": "List All Auctions (public)", "request": { "method": "GET", "url": "{{baseUrl}}/auction" } },
         { "name": "Live Auctions (public)", "request": { "method": "GET", "url": "{{baseUrl}}/auction/live" } },
         { "name": "Auction Detail (public)", "request": { "method": "GET", "url": "{{baseUrl}}/auction/1" } },
-        { "name": "Create Auction", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/auction", "body": { "mode": "raw", "raw": "{\"title\":\"Evening Koi Auction\",\"description\":\"Live auction\",\"startTime\":\"2025-11-09T09:00:00Z\",\"endTime\":\"2025-11-09T10:00:00Z\"}", "options": { "raw": { "language": "json" } } } } },
-        { "name": "My Auctions", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/auction/me" } }
+        {
+          "name": "Create Auction",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/auction",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Evening Koi Auction\",\"description\":\"Live auction\",\"startTime\":\"2025-11-09T09:00:00Z\",\"endTime\":\"2025-11-09T10:00:00Z\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          }
+        },
+        {
+          "name": "My Auctions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/auction/me"
+          }
+        }
       ]
     },
     {
       "name": "Bid",
       "item": [
-        { "name": "Place Bid", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/bid", "body": { "mode": "raw", "raw": "{\"itemOnAuctionId\":1,\"amount\":1500000}" } } },
-        { "name": "Buy Now", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/bid", "body": { "mode": "raw", "raw": "{\"itemOnAuctionId\":1,\"amount\":2500000,\"isBuyNow\":true}" } } }
+        {
+          "name": "Place Bid",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/bid",
+            "body": { "mode": "raw", "raw": "{\"itemOnAuctionId\":1,\"amount\":1500000}" }
+          }
+        },
+        {
+          "name": "Buy Now",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/bid",
+            "body": { "mode": "raw", "raw": "{\"itemOnAuctionId\":1,\"amount\":2500000,\"isBuyNow\":true}" }
+          }
+        }
       ]
     },
     {
       "name": "Cart",
       "item": [
         { "name": "View Cart", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/cart" } },
-        { "name": "Pay Cart", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/cart/1/pay", "body": { "mode": "raw", "raw": "{\"paymentMethod\":\"manual_transfer\"}" } } }
+        {
+          "name": "Pay Cart",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/cart/1/pay",
+            "body": { "mode": "raw", "raw": "{\"paymentMethod\":\"manual_transfer\"}" }
+          }
+        }
       ]
     },
     {
@@ -55,10 +155,32 @@
     {
       "name": "Withdrawal",
       "item": [
-        { "name": "Request Withdrawal", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/withdrawal", "body": { "mode": "raw", "raw": "{\"amount\": 1000000}" } } },
+        {
+          "name": "Request Withdrawal",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/withdrawal",
+            "body": { "mode": "raw", "raw": "{\"amount\":1000000}" }
+          }
+        },
         { "name": "My Withdrawals", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/withdrawal" } },
         { "name": "Admin: List Withdrawals", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/admin/withdrawals?status=pending" } },
-        { "name": "Admin: Process Withdrawal", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/admin/withdrawals/1/process", "body": { "mode": "raw", "raw": "{\"status\":\"approved\",\"payoutReference\":\"TRX-001\"}" } } }
+        {
+          "name": "Admin: Process Withdrawal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/admin/withdrawals/1/process",
+            "body": { "mode": "raw", "raw": "{\"status\":\"approved\",\"payoutReference\":\"TRX-001\"}" }
+          }
+        }
       ]
     },
     {
@@ -97,27 +219,93 @@
       ]
     },
     {
+      "name": "Ad Plan (Admin)",
+      "item": [
+        {
+          "name": "Create Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/ad-plan",
+            "body": { "mode": "raw", "raw": "{\"name\":\"Homepage Hero\",\"description\":\"Prime placement\",\"price\":500000,\"duration\":7,\"position\":\"homepage_hero\"}" }
+          }
+        },
+        { "name": "List Plans", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/ad-plan" } },
+        { "name": "Get Plan Detail", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/ad-plan/1" } },
+        {
+          "name": "Update Plan",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/ad-plan/1",
+            "body": { "mode": "raw", "raw": "{\"price\":600000,\"isActive\":true}" }
+          }
+        },
+        { "name": "Delete Plan", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/ad-plan/1" } }
+      ]
+    },
+    {
       "name": "Advertisement",
       "item": [
-        { "name": "Create Ad", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/advertisement", "body": { "mode": "raw", "raw": "{\"adPlanId\":1,\"title\":\"My Promo\",\"mediaUrl\":\"https://img\",\"redirectUrl\":\"https://link\",\"startDate\":\"2025-11-10\"}" } } },
-        { "name": "My Ads", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/advertisement/me" } },
-        { "name": "Admin: List Ads", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/advertisement/admin?status=pending" } },
-        { "name": "Admin: Update Status", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/advertisement/1/status", "body": { "mode": "raw", "raw": "{\"status\":\"approved\"}" } } },
-        { "name": "Serve Active Ads", "request": { "method": "GET", "url": "{{baseUrl}}/advertisement/serve?position=homepage_hero" } }
+        {
+          "name": "Create Advertisement",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/ads",
+            "body": { "mode": "raw", "raw": "{\"adPlanId\":1,\"title\":\"My Promo\",\"mediaUrl\":\"https://img\",\"redirectUrl\":\"https://link\",\"startDate\":\"2025-11-10\"}" }
+          }
+        },
+        { "name": "My Advertisements", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/ads/me" } },
+        { "name": "Admin: List Advertisements", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }], "url": "{{baseUrl}}/ads/admin?status=pending" } },
+        {
+          "name": "Admin: Update Ad Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/ads/1/status",
+            "body": { "mode": "raw", "raw": "{\"status\":\"approved\",\"note\":\"Looks good\"}" }
+          }
+        },
+        { "name": "Public: Active Ads", "request": { "method": "GET", "url": "{{baseUrl}}/ads/active?position=homepage_hero" } }
       ]
     },
     {
       "name": "Seller Review",
       "item": [
         { "name": "Pending Reviews (buyer)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/seller-review/pending" } },
-        { "name": "Create Review", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/seller-review", "body": { "mode": "raw", "raw": "{\"transactionId\":1,\"rating\":5,\"shippingScore\":4,\"comment\":\"Fast delivery!\"}" } } },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/seller-review",
+            "body": { "mode": "raw", "raw": "{\"transactionId\":1,\"rating\":5,\"shippingScore\":4,\"comment\":\"Fast delivery!\"}" }
+          }
+        },
         { "name": "Public: Seller Reviews", "request": { "method": "GET", "url": "{{baseUrl}}/seller-review/seller/1?page=1&limit=10" } }
       ]
     }
   ],
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "baseUrl", "value": "http://localhost:4000" },
     { "key": "token", "value": "" },
+    { "key": "refreshToken", "value": "" },
     { "key": "adminToken", "value": "" }
   ]
 }

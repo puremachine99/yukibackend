@@ -1,15 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Req,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PayTransactionDto } from './dto/pay-transaction.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('transaction')
@@ -17,22 +11,22 @@ export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
   @Get()
-  findAll(@Req() req) {
-    return this.transactionService.findAllByUser(req.user.id);
+  findAll(@CurrentUser() user: AuthenticatedRequestUser) {
+    return this.transactionService.findAllByUser(user.id);
   }
 
   @Post(':cartId/pay')
   payTransaction(
-    @Req() req,
+    @CurrentUser() user: AuthenticatedRequestUser,
     @Param('cartId') cartId: string,
     @Body() dto: PayTransactionDto,
   ) {
-    return this.transactionService.payTransaction(req.user.id, +cartId, dto);
+    return this.transactionService.payTransaction(user.id, +cartId, dto);
   }
 
   @Get('seller/summary')
-  getSellerSummary(@Req() req) {
-    return this.transactionService.getSellerRevenueSummary(req.user.id);
+  getSellerSummary(@CurrentUser() user: AuthenticatedRequestUser) {
+    return this.transactionService.getSellerRevenueSummary(user.id);
   }
 
   @Get('summary/daily')

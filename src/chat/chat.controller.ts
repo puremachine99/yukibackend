@@ -5,13 +5,14 @@ import {
   Get,
   Param,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('chat')
@@ -26,15 +27,18 @@ export class ChatController {
 
   @Post('auction/:auctionId')
   create(
-    @Req() req,
+    @CurrentUser() user: AuthenticatedRequestUser,
     @Param('auctionId') auctionId: string,
     @Body() createChatDto: CreateChatDto,
   ) {
-    return this.chatService.create(req.user.id, +auctionId, createChatDto);
+    return this.chatService.create(user.id, +auctionId, createChatDto);
   }
 
   @Delete(':id')
-  remove(@Req() req, @Param('id') id: string) {
-    return this.chatService.remove(+id, req.user.id);
+  remove(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Param('id') id: string,
+  ) {
+    return this.chatService.remove(+id, user.id);
   }
 }

@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { RevenueSummaryService } from './revenue-summary.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -36,7 +30,9 @@ export class RevenueSummaryController {
 
   @Get('chart')
   chart(@Query('range') range?: string) {
-    return this.revenueSummaryService.getChart(range ? Number(range) : undefined);
+    return this.revenueSummaryService.getChart(
+      range ? Number(range) : undefined,
+    );
   }
 
   @Get(':id')

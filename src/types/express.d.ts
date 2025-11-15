@@ -1,9 +1,9 @@
-import { User } from '@prisma/client';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: AuthenticatedRequestUser;
     }
   }
 }

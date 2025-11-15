@@ -124,7 +124,7 @@ export class WithdrawalService {
       WithdrawalStatus.approved,
       WithdrawalStatus.rejected,
       WithdrawalStatus.paid,
-    ];// samain kayak enum di scheme ya cok
+    ]; // samain kayak enum di scheme ya cok
 
     const where = validStatuses.includes(status as WithdrawalStatus)
       ? { status: status as WithdrawalStatus }

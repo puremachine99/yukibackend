@@ -1,18 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { BidService } from './bid.service';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('bid')
@@ -20,27 +21,40 @@ export class BidController {
   constructor(private readonly bidService: BidService) {}
 
   @Post()
-  create(@Req() req, @Body() dto: CreateBidDto) {
-    return this.bidService.create(req.user!.id, dto);
+  create(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Body() dto: CreateBidDto,
+  ) {
+    return this.bidService.create(user.id, dto);
   }
 
   @Get()
-  findAll(@Req() req) {
-    return this.bidService.findAll(req.user!);
+  findAll(@CurrentUser() user: AuthenticatedRequestUser) {
+    return this.bidService.findAll(user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() req) {
-    return this.bidService.findOne(+id, req.user!);
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedRequestUser,
+  ) {
+    return this.bidService.findOne(+id, user.id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Req() req, @Body() dto: UpdateBidDto) {
-    return this.bidService.update(+id, req.user!, dto);
+  update(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Body() dto: UpdateBidDto,
+  ) {
+    return this.bidService.update(+id, user.id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req) {
-    return this.bidService.remove(+id, req.user!);
+  remove(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedRequestUser,
+  ) {
+    return this.bidService.remove(+id, user.id);
   }
 }

@@ -37,7 +37,10 @@ export class AchievementController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAchievementDto: UpdateAchievementDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAchievementDto: UpdateAchievementDto,
+  ) {
     return this.achievementService.update(+id, updateAchievementDto);
   }
 

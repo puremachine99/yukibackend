@@ -1,16 +1,10 @@
-import {
-  Controller,
-  Get,
-  Req,
-  Patch,
-  Body,
-  UseGuards,
-  Param,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -18,16 +12,16 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  getOwnProfile(@Req() req) {
-    console.log('req.user:', req.user);
-    if (!req.user?.id) throw new Error('Unauthorized or invalid token');
-    return this.usersService.findOne(req.user.id);
+  getOwnProfile(@CurrentUser() user: AuthenticatedRequestUser) {
+    return this.usersService.findOne(user.id);
   }
 
   @Patch('me')
-  async updateOwnProfile(@Req() req, @Body() dto: UpdateUserDto) {
-    if (!req.user?.id) throw new Error('Unauthorized');
-    return this.usersService.update(req.user.id, dto);
+  async updateOwnProfile(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Body() dto: UpdateUserDto,
+  ) {
+    return this.usersService.update(user.id, dto);
   }
 
   @Public()

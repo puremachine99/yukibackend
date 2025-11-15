@@ -12,4 +12,3 @@ import { ActivityModule } from '../activity/activity.module';
   exports: [SellerReviewService],
 })
 export class SellerReviewModule {}
-

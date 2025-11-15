@@ -29,7 +29,6 @@ describe('Seller happy-path flow (e2e)', () => {
   let itemOnAuctionId: number;
   let cartId: number;
   let buyerToken: string;
-  let buyerId: number;
   let sellerId: number;
   let adminToken: string;
   let adminId: number;
@@ -83,7 +82,7 @@ describe('Seller happy-path flow (e2e)', () => {
     await app.close();
   });
 
-  it('registers, logs in, refreshes token, and updates profile', async () => {
+  it('registers, login, refresh token, update profile', async () => {
     const registerRes = await request(httpServer)
       .post('/auth/register')
       .send(sellerPayload)
@@ -138,7 +137,6 @@ describe('Seller happy-path flow (e2e)', () => {
       })
       .expect(201);
     buyerToken = buyerRes.body.access_token;
-    buyerId = buyerRes.body.user.id;
     sellerId = registerRes.body.user.id;
 
     const adminEmail = `admin_${Date.now()}@example.com`;
@@ -167,7 +165,7 @@ describe('Seller happy-path flow (e2e)', () => {
     adminToken = adminLogin.body.access_token;
   });
 
-  it('lets seller create inventory and auction, then exposes them publicly', async () => {
+  it('seller coba bikin auction + inventory, ekspose ke publik(gaperlulogin)', async () => {
     const createItemRes = await request(httpServer)
       .post('/items')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -230,7 +228,7 @@ describe('Seller happy-path flow (e2e)', () => {
     expect(auctionDetail.body?.id).toBe(auctionId);
   });
 
-  it('handles bidding, cart checkout, and transaction summary', async () => {
+  it('biddung, cart checkout, summary transaksi', async () => {
     // seed the item to the auction via Prisma (controller flow not built yet)
     // attach item to auction
     const ioa = await prisma.itemOnAuction.create({
@@ -290,7 +288,7 @@ describe('Seller happy-path flow (e2e)', () => {
     expect(transactionsRes.body[0].status).toBe('paid');
   });
 
-  it('handles social interactions and notifications', async () => {
+  it('follow, unfollow, like, wishlist, notification', async () => {
     // follow seller
     await request(httpServer)
       .post(`/follow/${sellerId}`)
@@ -344,7 +342,7 @@ describe('Seller happy-path flow (e2e)', () => {
       .expect(201);
   });
 
-  it('supports chat via HTTP and WebSocket', async () => {
+  it('chat lewat webSocket', async () => {
     await request(httpServer)
       .post(`/chat/auction/${auctionId}`)
       .set('Authorization', `Bearer ${buyerToken}`)
@@ -393,7 +391,7 @@ describe('Seller happy-path flow (e2e)', () => {
     ).toBe(true);
   });
 
-  it('allows withdrawals and admin processing', async () => {
+  it('coba withdrawal dan admin', async () => {
     await prisma.sellerBalance.upsert({
       where: { sellerId },
       update: {

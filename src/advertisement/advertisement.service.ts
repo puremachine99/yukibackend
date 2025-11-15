@@ -71,7 +71,8 @@ export class AdvertisementService implements OnModuleInit {
       where: { id },
       data: {
         ...dto,
-        price: dto.price !== undefined ? new Prisma.Decimal(dto.price) : undefined,
+        price:
+          dto.price !== undefined ? new Prisma.Decimal(dto.price) : undefined,
       },
     });
   }
@@ -156,19 +157,16 @@ export class AdvertisementService implements OnModuleInit {
       }
     }
 
-    const startDate =
-      dto.startDate ? new Date(dto.startDate) : ad.startDate ?? new Date();
+    const startDate = dto.startDate
+      ? new Date(dto.startDate)
+      : (ad.startDate ?? new Date());
 
     let endDate = dto.endDate ? new Date(dto.endDate) : ad.endDate;
-    if (
-      dto.status === AdStatus.approved ||
-      dto.status === AdStatus.active
-    ) {
-      endDate =
-        new Date(
-          (startDate ?? new Date()).getTime() +
-            (ad.adPlan.duration || 0) * 24 * 60 * 60 * 1000,
-        );
+    if (dto.status === AdStatus.approved || dto.status === AdStatus.active) {
+      endDate = new Date(
+        (startDate ?? new Date()).getTime() +
+          (ad.adPlan.duration || 0) * 24 * 60 * 60 * 1000,
+      );
     }
 
     return this.prisma.advertisement.update({

@@ -110,4 +110,3 @@ export class SellerReviewService {
     return transactions;
   }
 }
-

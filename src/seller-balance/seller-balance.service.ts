@@ -26,7 +26,9 @@ export class SellerBalanceService {
       this.prisma.sellerBalance.findMany({
         where,
         include: {
-          seller: { select: { id: true, name: true, email: true, avatar: true } },
+          seller: {
+            select: { id: true, name: true, email: true, avatar: true },
+          },
         },
         orderBy: { updatedAt: 'desc' },
         skip: (page - 1) * limit,
@@ -97,27 +99,27 @@ export class SellerBalanceService {
       await Promise.all([
         this.prisma.transaction.findMany({
           where: { sellerId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        select: {
-          id: true,
-          totalAmount: true,
-          adminFee: true,
-          status: true,
-          createdAt: true,
-        },
-      }),
-      this.prisma.withdrawal.findMany({
-        where: { sellerId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        select: {
-          id: true,
-          amount: true,
-          status: true,
-          createdAt: true,
-        },
-      }),
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          select: {
+            id: true,
+            totalAmount: true,
+            adminFee: true,
+            status: true,
+            createdAt: true,
+          },
+        }),
+        this.prisma.withdrawal.findMany({
+          where: { sellerId },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          select: {
+            id: true,
+            amount: true,
+            status: true,
+            createdAt: true,
+          },
+        }),
         this.pendingWithdrawalSummary(sellerId),
         this.sellerRatingSummary(sellerId),
       ]);
@@ -211,12 +213,19 @@ export class SellerBalanceService {
     return series;
   }
 
-  private serializeBalance(balance: any) {
+  private serializeBalance<
+    T extends {
+      totalSales: Prisma.Decimal | number | null;
+      netBalance: Prisma.Decimal | number | null;
+      adminFee: Prisma.Decimal | number | null;
+    },
+  >(balance: T) {
+    const { totalSales, netBalance, adminFee, ...rest } = balance;
     return {
-      ...balance,
-      totalSales: this.decimalToNumber(balance.totalSales),
-      netBalance: this.decimalToNumber(balance.netBalance),
-      adminFee: this.decimalToNumber(balance.adminFee),
+      ...rest,
+      totalSales: this.decimalToNumber(totalSales),
+      netBalance: this.decimalToNumber(netBalance),
+      adminFee: this.decimalToNumber(adminFee),
     };
   }
 

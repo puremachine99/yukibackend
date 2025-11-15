@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -72,47 +66,47 @@ enum ItemCondition {
 // ================= Models =================
 
 model User {
-  id                   Int               @id @default(autoincrement())
-  name                 String
-  email                String            @unique
-  phone                String?           @unique
-  password             String
-  role                 String            @default("user")
-  bio                  String?           @db.VarChar(160)
-  avatar               String?
-  banner               String?
-  city                 String?
-  instagram            String?
-  youtube              String?
-  isVerified           Boolean           @default(false)
-  isPriority           Boolean           @default(false)
-  reputation           Int               @default(0) // poin prestise
-  isBanned             Boolean           @default(false)
+  id                    Int               @id @default(autoincrement())
+  name                  String
+  email                 String            @unique
+  phone                 String?           @unique
+  password              String
+  role                  String            @default("user")
+  bio                   String?           @db.VarChar(160)
+  avatar                String?
+  banner                String?
+  city                  String?
+  instagram             String?
+  youtube               String?
+  isVerified            Boolean           @default(false)
+  isPriority            Boolean           @default(false)
+  reputation            Int               @default(0) // poin prestise
+  isBanned              Boolean           @default(false)
   // Relations
-  auctions             Auction[]         @relation("UserAuctions")
-  items                Item[]            @relation("UserItems")
-  bids                 Bid[]
-  chats                Chat[]
-  carts                Cart[]
-  buyerTransactions    Transaction[]     @relation("BuyerTransactions")
-  sellerTransactions   Transaction[]     @relation("SellerTransactions")
-  withdrawals          Withdrawal[]
-  processedWithdrawals Withdrawal[]      @relation("ProcessedWithdrawals")
-  sellerBalances       SellerBalance[]
-  followers            Follow[]          @relation("Following")
-  following            Follow[]          @relation("Follower")
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  wishlists            Wishlist[]
-  likes                Like[]
-  userAchievements     UserAchievement[]
-  deletedAt            DateTime?
-  notifications        Notification[]
-  activities           Activity[]
-  userAddresses        UserAddress[]
-  advertisements       Advertisement[]
-  sellerReviewsGiven   SellerReview[]    @relation("SellerReviewsBuyer")
-  sellerReviewsReceived SellerReview[]   @relation("SellerReviewsSeller")
+  auctions              Auction[]         @relation("UserAuctions")
+  items                 Item[]            @relation("UserItems")
+  bids                  Bid[]
+  chats                 Chat[]
+  carts                 Cart[]
+  buyerTransactions     Transaction[]     @relation("BuyerTransactions")
+  sellerTransactions    Transaction[]     @relation("SellerTransactions")
+  withdrawals           Withdrawal[]
+  processedWithdrawals  Withdrawal[]      @relation("ProcessedWithdrawals")
+  sellerBalances        SellerBalance[]
+  followers             Follow[]          @relation("Following")
+  following             Follow[]          @relation("Follower")
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  wishlists             Wishlist[]
+  likes                 Like[]
+  userAchievements      UserAchievement[]
+  deletedAt             DateTime?
+  notifications         Notification[]
+  activities            Activity[]
+  userAddresses         UserAddress[]
+  advertisements        Advertisement[]
+  sellerReviewsGiven    SellerReview[]    @relation("SellerReviewsBuyer")
+  sellerReviewsReceived SellerReview[]    @relation("SellerReviewsSeller")
 }
 
 model UserAddress {
@@ -464,17 +458,17 @@ model Advertisement {
 }
 
 model SellerReview {
-  id          Int       @id @default(autoincrement())
-  transactionId Int     @unique
-  transaction Transaction @relation(fields: [transactionId], references: [id])
-  sellerId    Int
-  seller      User      @relation("SellerReviewsSeller", fields: [sellerId], references: [id])
-  buyerId     Int
-  buyer       User      @relation("SellerReviewsBuyer", fields: [buyerId], references: [id])
-  rating      Int
-  comment     String?
-  shippingScore Int?    @default(0)
-  createdAt   DateTime  @default(now())
+  id            Int         @id @default(autoincrement())
+  transactionId Int         @unique
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  sellerId      Int
+  seller        User        @relation("SellerReviewsSeller", fields: [sellerId], references: [id])
+  buyerId       Int
+  buyer         User        @relation("SellerReviewsBuyer", fields: [buyerId], references: [id])
+  rating        Int
+  comment       String?
+  shippingScore Int?        @default(0)
+  createdAt     DateTime    @default(now())
 
   @@index([sellerId])
   @@index([buyerId])
@@ -499,3 +493,828 @@ model Activity {
   metadata  Json?
   createdAt DateTime @default(now())
 }
+ 
+
+// ========================================================
+//  OPTIMIZED PRISMA SCHEMA FOR REAL-TIME AUCTION SYSTEM
+//  Dengan komentar alasan setiap index/perubahan
+// ========================================================
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// // ========================================================
+// // ENUMS (stabil, aman, tidak perlu diagungkan)
+// // ========================================================
+
+// enum AdStatus {
+//   pending
+//   approved
+//   rejected
+//   active
+//   expired
+// }
+
+// enum TransactionStatus {
+//   pending
+//   paid
+//   refunded
+//   cancelled
+// }
+
+// enum AuctionStatus {
+//   draft
+//   ready
+//   active
+//   ended
+//   cancelled
+//   reported
+// }
+
+// enum CartStatus {
+//   pending
+//   expired
+//   completed
+//   cancelled
+// }
+
+// enum WithdrawalStatus {
+//   pending
+//   approved
+//   rejected
+//   paid
+// }
+
+// enum BalanceStatus {
+//   pending
+//   available
+//   withdrawn
+// }
+
+// enum ItemGender {
+//   male
+//   female
+//   unknown
+// }
+
+// enum ItemCondition {
+//   new
+//   used
+// }
+
+// // ========================================================
+// // MODEL: USER — banyak read heavy, perlu index dasar
+// // ========================================================
+
+// model User {
+//   id       Int     @id @default(autoincrement())
+//   name     String
+//   email    String  @unique // login utama → wajib unique index
+//   phone    String? @unique // sering query by phone
+//   password String
+
+//   role String @default("user")
+
+//   bio       String? @db.VarChar(160)
+//   avatar    String?
+//   banner    String?
+//   city      String?
+//   instagram String?
+//   youtube   String?
+
+//   // alasan index:
+//   // admin panel sering memfilter ini
+//   isVerified Boolean @default(false)
+//   isPriority Boolean @default(false)
+//   isBanned   Boolean @default(false)
+
+//   reputation Int @default(0)
+
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   deletedAt DateTime? // butuh partial index manual nantinya
+
+//   // Relations (tidak disentuh)
+//   auctions             Auction[]
+//   items                Item[]
+//   bids                 Bid[]
+//   chats                Chat[]
+//   carts                Cart[]
+//   buyerTransactions    Transaction[] @relation("UserAsBuyer")
+//   sellerTransactions   Transaction[] @relation("UserAsSeller")
+//   // withdrawal yang diajukan user
+//   withdrawalsRequested Withdrawal[]  @relation("UserAsWithdrawalRequester")
+
+//   // withdrawal yang user proses sebagai admin
+//   withdrawalsProcessed  Withdrawal[]      @relation("UserAsWithdrawalProcessor")
+//   sellerBalances        SellerBalance[]
+//   followers             Follow[]          @relation("Following")
+//   following             Follow[]          @relation("Follower")
+//   wishlists             Wishlist[]
+//   likes                 Like[]
+//   userAchievements      UserAchievement[]
+//   notifications         Notification[]
+//   activities            Activity[]
+//   userAddresses         UserAddress[]
+//   advertisements        Advertisement[]
+//   sellerReviewsGiven    SellerReview[]    @relation("SellerReviewsBuyer")
+//   sellerReviewsReceived SellerReview[]    @relation("SellerReviewsSeller")
+//   transactions          Transaction[]     @relation("UserAsTransactionOwner")
+
+//   @@index([isBanned]) // filtering cepat
+//   @@index([isVerified]) // filtering cepat
+// }
+
+// // ========================================================
+// // MODEL: USER ADDRESS — index userId sudah benar
+// // ========================================================
+
+// model UserAddress {
+//   id     Int @id @default(autoincrement())
+//   userId Int
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   label       String?
+//   recipient   String
+//   phone       String
+//   addressLine String
+//   city        String
+//   province    String
+//   postalCode  String?
+//   country     String? @default("Indonesia")
+
+//   isDefault Boolean @default(false)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([userId]) // lookup alamat pengguna
+// }
+
+// // ========================================================
+// // MODEL: FOLLOW — index sudah efisien untuk sosial
+// // ========================================================
+
+// model Follow {
+//   id          Int @id @default(autoincrement())
+//   followerId  Int
+//   followingId Int
+
+//   follower  User @relation("Follower", fields: [followerId], references: [id])
+//   following User @relation("Following", fields: [followingId], references: [id])
+
+//   createdAt DateTime @default(now())
+
+//   @@unique([followerId, followingId]) // mencegah duplikasi follow
+//   @@index([followerId])
+//   @@index([followingId])
+// }
+
+// // ========================================================
+// // MODEL: AUCTION — butuh index status
+// // ========================================================
+
+// model Auction {
+//   id          Int     @id @default(autoincrement())
+//   title       String
+//   description String?
+
+//   startTime DateTime
+//   endTime   DateTime
+
+//   status AuctionStatus @default(draft)
+//   // alasan: admin dan cron sering query by status
+
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id])
+
+//   items ItemOnAuction[]
+
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   deletedAt DateTime?
+
+//   extraTime Int? @default(0)
+
+//   // NOTE:
+//   // Prisma TIDAK BISA membuat partial index:
+//   //   WHERE deletedAt IS NULL AND status = 'active'
+//   // wajib dibuat via migration SQL manual
+
+//   @@index([userId])
+//   @@index([status]) // mempercepat list active/end
+// }
+
+// // ========================================================
+// // MODEL: ITEM — read-heavy (feed/collection)
+// // ========================================================
+
+// model Item {
+//   id          Int     @id @default(autoincrement())
+//   name        String
+//   description String?
+
+//   size   Float?
+//   weight Float?
+
+//   gender    ItemGender @default(unknown)
+//   category  String?
+//   origin    String?
+//   breeder   String?
+//   age       Int?
+//   condition String?
+
+//   certificateUrl String?
+//   attributes     Json? // JSONB → sebaiknya pakai GIN index manual
+
+//   startingBid  Decimal  @default(0.00) @db.Decimal(12, 2)
+//   bidIncrement Decimal  @default(0.00) @db.Decimal(12, 2)
+//   buyItNow     Decimal? @db.Decimal(12, 2)
+
+//   isSold Boolean @default(false)
+//   // alasan: feed sering filter available items
+
+//   ownerId Int
+//   owner   User @relation(fields: [ownerId], references: [id])
+
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   deletedAt DateTime?
+
+//   views Int @default(0)
+
+//   media     Media[]
+//   likes     Like[]
+//   wishlists Wishlist[]
+//   auctions  ItemOnAuction[]
+//   itemTags  ItemTag[]
+
+//   // NOTE:
+//   // Prisma tidak bisa index DESC atau partial index
+//   // Manual SQL diperlukan untuk:
+//   //
+//   // CREATE INDEX idx_item_feed
+//   // ON "Item"(category, createdAt DESC)
+//   // WHERE isSold = false AND deletedAt IS NULL;
+
+//   // INDEX PENTING UNTUK FEED
+//   @@index([ownerId])
+//   @@index([category])
+//   @@index([isSold])
+//   @@index([createdAt]) // sorting terbaru
+// }
+
+// // ========================================================
+// // MODEL: TAG — simple, aman
+// // ========================================================
+
+// model Tag {
+//   id    Int       @id @default(autoincrement())
+//   name  String    @unique // untuk search by tag
+//   items ItemTag[]
+// }
+
+// // ========================================================
+// // MODEL: ITEM TAG — many-to-many pivot
+// // ========================================================
+
+// model ItemTag {
+//   id Int @id @default(autoincrement())
+
+//   itemId Int
+//   tagId  Int
+
+//   item Item @relation(fields: [itemId], references: [id])
+//   tag  Tag  @relation(fields: [tagId], references: [id])
+
+//   @@index([itemId]) // sering query by item
+//   @@index([tagId]) // sering query by tag
+// }
+
+// // ========================================================
+// // MODEL: ITEM ON AUCTION — pivot utama lelang
+// // ========================================================
+// // Query umum: ambil semua item dalam suatu auction,
+// // atau cari item tertentu dalam auction tertentu.
+// // Butuh index kombinasi + index sort createdAt.
+
+// model ItemOnAuction {
+//   id Int @id @default(autoincrement())
+
+//   itemId    Int
+//   auctionId Int
+
+//   item    Item    @relation(fields: [itemId], references: [id])
+//   auction Auction @relation(fields: [auctionId], references: [id])
+
+//   status String? @default("active")
+
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+//   deletedAt DateTime?
+
+//   bids  Bid[]
+//   chats Chat[]
+//   cart  Cart?
+
+//   // NOTE:
+//   // Prisma tidak bisa partial index untuk active items:
+//   //   WHERE deletedAt IS NULL
+//   // migration manual dibutuhkan.
+
+//   @@unique([itemId, auctionId]) // mencegah item double masuk auction
+//   @@index([auctionId]) // untuk listing by auction
+//   @@index([itemId]) // untuk lookup item cepat
+//   @@index([status]) // admin filtering auction items
+//   @@index([createdAt]) // sorting items in auction
+// }
+
+// // ========================================================
+// // MODEL: MEDIA — simple, tapi index itemId wajib
+// // ========================================================
+
+// model Media {
+//   id        Int      @id @default(autoincrement())
+//   url       String
+//   type      String   @default("image")
+//   itemId    Int
+//   item      Item     @relation(fields: [itemId], references: [id])
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([itemId]) // fetch media per item
+// }
+
+// // ========================================================
+// // MODEL: LIKE — heavy read, heavy constraint
+// // ========================================================
+// // Banyak user klik like/ unlike → index dibutuhkan
+// // untuk memastikan kecepatan + mencegah duplicate like.
+
+// model Like {
+//   id Int @id @default(autoincrement())
+
+//   userId Int
+//   itemId Int
+
+//   item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+//   user User @relation(fields: [userId], references: [id])
+
+//   createdAt DateTime @default(now())
+
+//   @@unique([userId, itemId]) // mencegah double-like
+//   @@index([itemId]) // lihat siapa yang like item
+//   @@index([userId]) // list like user
+// }
+
+// // ========================================================
+// // MODEL: WISHLIST — mirip Like
+// // ========================================================
+
+// model Wishlist {
+//   id Int @id @default(autoincrement())
+
+//   userId Int
+//   itemId Int
+
+//   user User @relation(fields: [userId], references: [id])
+//   item Item @relation(fields: [itemId], references: [id])
+
+//   createdAt DateTime @default(now())
+
+//   @@unique([userId, itemId]) // mencegah double wishlist
+//   @@index([itemId])
+//   @@index([userId])
+// }
+
+// // ========================================================
+// // MODEL: BID — tabel paling berat di sistem
+// // ========================================================
+// // Write heavy: banyak INSERT
+// // Read heavy: "ambil bid terakhir" ← perlu index DESC (manual)
+// // Autovacuum tuning wajib manual
+
+// model Bid {
+//   id Int @id @default(autoincrement())
+
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id])
+
+//   itemOnAuctionId Int
+//   itemOnAuction   ItemOnAuction @relation(fields: [itemOnAuctionId], references: [id])
+
+//   amount   Decimal @db.Decimal(12, 2)
+//   isWin    Boolean @default(false)
+//   isSnipe  Boolean @default(false)
+//   isBuyNow Boolean @default(false)
+
+//   createdAt DateTime @default(now())
+
+//   // NOTE:
+//   // Prisma tidak bisa index DESC,
+//   // tapi BID butuh:
+//   //   CREATE INDEX idx_bid_latest
+//   //   ON "Bid"(itemOnAuctionId, id DESC);
+//   // untuk ambil bid terbaru secepat mungkin
+//   // MIGRATION MANUAL DIBUTUHKAN
+
+//   @@index([itemOnAuctionId]) // fetch semua bid dalam auction
+//   @@index([userId]) // lihat riwayat bid user
+// }
+
+// // ========================================================
+// // MODEL: CHAT — heavy insert + heavy read
+// // ========================================================
+// // Query umum:
+// // - get last 50 messages by itemOnAuction → sorting DESC wajib
+// // - but Prisma tidak bisa DESC index → manual
+// // - but Prisma bisa index kombinasi dasar
+
+// model Chat {
+//   id Int @id @default(autoincrement())
+
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id])
+
+//   itemOnAuctionId Int
+//   itemOnAuction   ItemOnAuction @relation(fields: [itemOnAuctionId], references: [id])
+
+//   message String
+
+//   parentId Int?
+//   parent   Chat?  @relation("ChatReplies", fields: [parentId], references: [id])
+//   replies  Chat[] @relation("ChatReplies")
+
+//   isDeleted Boolean   @default(false)
+//   deletedAt DateTime?
+
+//   createdAt DateTime @default(now())
+//   // alasan:
+//   // - sorting ascending tetap membantu planner
+//   // - walau kita butuh DESC, Prisma tidak mendukung DESC index
+//   //   → WAJIB manual:
+//   //   CREATE INDEX idx_chat_recent
+//   //   ON "Chat"(itemOnAuctionId, createdAt DESC)
+//   //   WHERE deletedAt IS NULL;
+
+//   @@index([itemOnAuctionId, createdAt])
+//   @@index([userId]) // fetch chat user
+// }
+
+// // ========================================================
+// // MODEL: CART — read/write heavy saat closing auction
+// // ========================================================
+// // QPS cukup tinggi saat checkout / hold bid
+// // Index buyerId & status penting
+
+// model Cart {
+//   id Int @id @default(autoincrement())
+
+//   buyerId Int
+//   buyer   User @relation(fields: [buyerId], references: [id])
+
+//   itemOnAuctionId Int           @unique
+//   itemOnAuction   ItemOnAuction @relation(fields: [itemOnAuctionId], references: [id])
+
+//   price       Decimal    @db.Decimal(12, 2)
+//   isPaid      Boolean    @default(false)
+//   isProcessed Boolean    @default(false)
+//   status      CartStatus @default(pending)
+
+//   transaction Transaction?
+
+//   addedAt   DateTime  @default(now())
+//   expiresAt DateTime
+//   paidAt    DateTime?
+
+//   @@index([buyerId])
+//   @@index([status])
+// }
+
+// // ========================================================
+// // MODEL: ACHIEVEMENT — mostly static, simple
+// // ========================================================
+
+// model Achievement {
+//   id          Int     @id @default(autoincrement())
+//   name        String
+//   description String
+//   icon        String?
+//   badgeColor  String?
+//   condition   String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   userAchievements UserAchievement[]
+// }
+
+// // ========================================================
+// // MODEL: USER ACHIEVEMENT — pivot table
+// // ========================================================
+
+// model UserAchievement {
+//   id            Int @id @default(autoincrement())
+//   userId        Int
+//   achievementId Int
+
+//   user        User        @relation(fields: [userId], references: [id])
+//   achievement Achievement @relation(fields: [achievementId], references: [id])
+
+//   earnedAt DateTime @default(now())
+//   // alasan: user tidak boleh punya achievement yang sama dua kali
+
+//   @@unique([userId, achievementId])
+//   @@index([userId]) // fetch semua achievement user
+//   @@index([achievementId]) // analytics
+// }
+
+// // ========================================================
+// // MODEL: TRANSACTION — heavy read + analytical filters
+// // ========================================================
+// // Ini tabel kritis karena:
+// // - join ke Cart, User (buyer/seller), SellerBalance
+// // - sering dipanggil di dashboard admin
+// // - banyak filter by: status, buyerId, sellerId
+
+// model Transaction {
+//   id Int @id @default(autoincrement())
+
+//   cartId Int  @unique
+//   cart   Cart @relation(fields: [cartId], references: [id])
+
+//   buyerId Int
+//   buyer   User @relation("UserAsBuyer", fields: [buyerId], references: [id])
+
+//   sellerId Int
+//   seller   User @relation("UserAsSeller", fields: [sellerId], references: [id])
+
+//   totalAmount Decimal @db.Decimal(12, 2)
+//   itemPrice   Decimal @db.Decimal(12, 2)
+//   adminFee    Decimal @default(0.00) @db.Decimal(12, 2)
+
+//   paymentGateway String?
+//   feeBreakdown   Json?
+
+//   refundAmount Decimal?  @default(0.00) @db.Decimal(12, 2)
+//   refundedAt   DateTime?
+
+//   status TransactionStatus @default(pending)
+
+//   paidAt    DateTime?
+//   createdAt DateTime  @default(now())
+//   updatedAt DateTime  @updatedAt
+
+//   sellerBalanceId Int?
+//   sellerBalance   SellerBalance? @relation(fields: [sellerBalanceId], references: [id])
+
+//   advertisements Advertisement[]
+//   sellerReview   SellerReview?
+
+//   // NOTE:
+//   // Bisa dipertimbangkan partial index untuk status = 'paid'
+//   // tapi Prisma tidak mendukung → lakukan manual.
+
+//   userId Int?
+//   user   User? @relation("UserAsTransactionOwner", fields: [userId], references: [id])
+
+//   @@index([status]) // admin often filters by status
+//   @@index([buyerId]) // list transaksi user
+//   @@index([sellerId]) // laporan pendapatan seller
+// }
+
+// // ========================================================
+// // MODEL: SELLER BALANCE — unique per seller
+// // ========================================================
+// // Tabel ini krusial untuk tracking saldo.
+// // read-heavy in dashboard, write-heavy after transactions.
+
+// model SellerBalance {
+//   id Int @id @default(autoincrement())
+
+//   sellerId Int  @unique
+//   seller   User @relation(fields: [sellerId], references: [id])
+
+//   totalSales Decimal @default(0.00) @db.Decimal(12, 2)
+//   adminFee   Decimal @default(0.00) @db.Decimal(12, 2)
+//   netBalance Decimal @default(0.00) @db.Decimal(12, 2)
+
+//   status BalanceStatus @default(pending)
+
+//   transactions Transaction[]
+
+//   updatedAt DateTime @updatedAt
+//   createdAt DateTime @default(now())
+
+//   @@index([status]) // laporan admin
+// }
+
+// // ========================================================
+// // MODEL: TRANSACTION LOG — audit log
+// // ========================================================
+// // Banyak data tapi read-low, write-high.
+// // Tidak butuh index besar tapi boleh ditambahkan index referenceType + referenceId
+
+// model TransactionLog {
+//   id Int @id @default(autoincrement())
+
+//   referenceType String
+//   referenceId   Int?
+
+//   amount    Decimal @db.Decimal(12, 2)
+//   direction String
+//   note      String?
+
+//   createdAt DateTime @default(now())
+
+//   @@index([referenceType])
+//   @@index([referenceId])
+// }
+
+// // ========================================================
+// // MODEL: WITHDRAWAL — penting untuk admin
+// // ========================================================
+// // Banyak filtering by status, sellerId, createdAt.
+
+// model Withdrawal {
+//   id Int @id @default(autoincrement())
+
+//   // ---------------------------------------------
+//   // USER AS SELLER (yang meminta withdrawal)
+//   // ---------------------------------------------
+//   sellerId Int
+//   seller   User @relation("UserAsWithdrawalRequester", fields: [sellerId], references: [id])
+
+//   amount Decimal          @db.Decimal(12, 2)
+//   status WithdrawalStatus @default(pending)
+
+//   // ---------------------------------------------
+//   // USER AS ADMIN (yang memproses withdrawal)
+//   // ---------------------------------------------
+//   processedBy Int?
+//   admin       User? @relation("UserAsWithdrawalProcessor", fields: [processedBy], references: [id])
+
+//   payoutReference String?
+//   payoutReceipt   String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([status])
+//   @@index([sellerId])
+// }
+
+// // ========================================================
+// // MODEL: REVENUE SUMMARY — tabel agregasi
+// // ========================================================
+// // Biasanya 1 baris per hari.
+// // Query sangat ringan karena ukurannya kecil.
+
+// model RevenueSummary {
+//   id Int @id @default(autoincrement())
+
+//   date       DateTime @unique // laporan per hari
+//   periodType String   @default("daily")
+
+//   totalRevenue     Decimal @default(0.00) @db.Decimal(12, 2)
+//   totalFee         Decimal @default(0.00) @db.Decimal(12, 2)
+//   totalTransaction Int     @default(0)
+//   totalWithdrawal  Int     @default(0)
+
+//   createdAt DateTime @default(now())
+
+//   // NOTE: tidak perlu banyak index, tabel kecil.
+// }
+
+// // ========================================================
+// // MODEL: AD PLAN — paket iklan
+// // ========================================================
+// // Query rendah, update rendah.
+
+// model AdPlan {
+//   id          Int     @id @default(autoincrement())
+//   name        String
+//   description String?
+//   price       Decimal @db.Decimal(12, 2)
+//   duration    Int
+//   position    String
+//   isActive    Boolean @default(true)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   advertisements Advertisement[]
+
+//   @@index([isActive]) // listing plan aktif
+// }
+
+// // ========================================================
+// // MODEL: ADVERTISEMENT — user membeli paket iklan
+// // ========================================================
+// // Query umum: filter status, filter userId, filter planId, filter date.
+
+// model Advertisement {
+//   id Int @id @default(autoincrement())
+
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id])
+
+//   adPlanId Int
+//   adPlan   AdPlan @relation(fields: [adPlanId], references: [id])
+
+//   title       String
+//   mediaUrl    String
+//   redirectUrl String?
+
+//   startDate DateTime?
+//   endDate   DateTime?
+
+//   status AdStatus @default(pending)
+//   note   String?
+
+//   transactionId Int?
+//   transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([status]) // admin filter
+//   @@index([userId]) // tampilkan iklan user
+//   @@index([adPlanId]) // laporan paket
+// }
+
+// // ========================================================
+// // MODEL: SELLER REVIEW — 1 review per transaksi
+// // ========================================================
+// // Query berat per transaksi / seller dashboard.
+
+// model SellerReview {
+//   id Int @id @default(autoincrement())
+
+//   transactionId Int         @unique
+//   transaction   Transaction @relation(fields: [transactionId], references: [id])
+
+//   sellerId Int
+//   seller   User @relation("SellerReviewsSeller", fields: [sellerId], references: [id])
+
+//   buyerId Int
+//   buyer   User @relation("SellerReviewsBuyer", fields: [buyerId], references: [id])
+
+//   rating        Int
+//   comment       String?
+//   shippingScore Int?    @default(0)
+
+//   createdAt DateTime @default(now())
+
+//   @@index([sellerId]) // dashboard seller
+//   @@index([buyerId]) // list review user
+// }
+
+// // ========================================================
+// // MODEL: NOTIFICATION — heavy write, light read
+// // ========================================================
+// // Banyak insert, sedikit read.
+// // Index userId wajib.
+
+// model Notification {
+//   id Int @id @default(autoincrement())
+
+//   userId Int
+//   user   User @relation(fields: [userId], references: [id])
+
+//   type    String
+//   message String
+//   data    Json?
+
+//   isRead    Boolean  @default(false)
+//   createdAt DateTime @default(now())
+
+//   @@index([userId])
+//   @@index([isRead]) // untuk unread count
+// }
+
+// // ========================================================
+// // MODEL: ACTIVITY — audit log besar
+// // ========================================================
+// // Heavy write, low read → index minimal
+
+// model Activity {
+//   id Int @id @default(autoincrement())
+
+//   userId Int?
+//   user   User? @relation(fields: [userId], references: [id])
+
+//   action    String
+//   metadata  Json?
+//   createdAt DateTime @default(now())
+
+//   @@index([userId]) // dashboard user activity
+//   @@index([createdAt]) // sorting terbaru
+// }

@@ -36,7 +36,7 @@ export class FollowService {
     });
     const followerName = follower?.name || 'Someone';
     await this.notification.create(
-      targetId, 
+      targetId,
       'follow',
       `${followerName} started following you.`,
       { followerId: userId },

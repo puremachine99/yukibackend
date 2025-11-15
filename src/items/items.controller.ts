@@ -1,13 +1,12 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
@@ -16,6 +15,8 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('items')
@@ -47,17 +48,20 @@ export class ItemsController {
   }
 
   @Post()
-  create(@Req() req, @Body() createItemDto: CreateItemDto) {
-    return this.itemsService.create(req.user.id, createItemDto);
+  create(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Body() createItemDto: CreateItemDto,
+  ) {
+    return this.itemsService.create(user.id, createItemDto);
   }
 
   @Post(':id/media')
   uploadMedia(
-    @Req() req,
+    @CurrentUser() user: AuthenticatedRequestUser,
     @Param('id') id: string,
     @Body() dto: CreateMediaDto,
   ) {
-    return this.itemsService.uploadMedia(+id, req.user.id, dto);
+    return this.itemsService.uploadMedia(+id, user.id, dto);
   }
 
   @Public()
@@ -67,12 +71,19 @@ export class ItemsController {
   }
 
   @Patch(':id')
-  update(@Req() req, @Param('id') id: string, @Body() dto: UpdateItemDto) {
-    return this.itemsService.update(+id, req.user.id, dto);
+  update(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateItemDto,
+  ) {
+    return this.itemsService.update(+id, user.id, dto);
   }
 
   @Delete(':id')
-  remove(@Req() req, @Param('id') id: string) {
-    return this.itemsService.remove(+id, req.user.id);
+  remove(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Param('id') id: string,
+  ) {
+    return this.itemsService.remove(+id, user.id);
   }
 }

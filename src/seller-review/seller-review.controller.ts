@@ -5,13 +5,14 @@ import {
   Param,
   Post,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { SellerReviewService } from './seller-review.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateSellerReviewDto } from './dto/create-seller-review.dto';
 import { Public } from '../auth/decorators/public.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedRequestUser } from '../auth/decorators/current-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('seller-review')
@@ -19,13 +20,16 @@ export class SellerReviewController {
   constructor(private readonly sellerReviewService: SellerReviewService) {}
 
   @Post()
-  create(@Req() req, @Body() dto: CreateSellerReviewDto) {
-    return this.sellerReviewService.create(req.user.id, dto);
+  create(
+    @CurrentUser() user: AuthenticatedRequestUser,
+    @Body() dto: CreateSellerReviewDto,
+  ) {
+    return this.sellerReviewService.create(user.id, dto);
   }
 
   @Get('pending')
-  pending(@Req() req) {
-    return this.sellerReviewService.pendingForBuyer(req.user.id);
+  pending(@CurrentUser() user: AuthenticatedRequestUser) {
+    return this.sellerReviewService.pendingForBuyer(user.id);
   }
 
   @Public()
